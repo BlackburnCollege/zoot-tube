@@ -3,12 +3,16 @@
  */
 package zoot.tube;
 
+import zoot.tube.googleapi.GoogleAPI;
+
 public class App {
     public String getGreeting() {
         return "Hello world.";
     }
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+    public static void main(String[] args) throws Exception {
+        GoogleAPI googleAPI = new GoogleAPI();
+        String title = googleAPI.getVideoTitleByID("FSAjwIwBk6A");
+        System.out.println(title);
     }
 }
