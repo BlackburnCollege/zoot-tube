@@ -3,6 +3,8 @@
  */
 package zoot.tube;
 
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.VideoListResponse;
 import zoot.tube.googleapi.GoogleAPI;
 
 public class App {
@@ -12,7 +14,9 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         GoogleAPI googleAPI = new GoogleAPI();
-        String title = googleAPI.getVideoTitleByID("FSAjwIwBk6A");
-        System.out.println(title);
+        SearchListResponse first = googleAPI.search("pizza");
+        SearchListResponse second = googleAPI.search("pineapple");
+        System.out.println(first);
+        System.out.println(second);
     }
 }
