@@ -1,6 +1,7 @@
 .idea
 nbproject
-src/main/resources/user
+src/main/resources/users/*
+!src/main/resources/users/DoNotDeleteMe.txt
 
 # Compiled class file
 *.class

@@ -4,8 +4,7 @@
 package zoot.tube;
 
 import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.VideoListResponse;
-import zoot.tube.googleapi.GoogleAPI;
+import zoot.tube.googleapi.YouTubeAPI;
 
 public class App {
     public String getGreeting() {
@@ -13,9 +12,9 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        GoogleAPI googleAPI = new GoogleAPI();
-        SearchListResponse first = googleAPI.search("pizza");
-        SearchListResponse second = googleAPI.search("pineapple");
+        YouTubeAPI youtubeAPI = new YouTubeAPI("cordell-blackburn");
+        SearchListResponse first = youtubeAPI.search("pizza");
+        SearchListResponse second = youtubeAPI.search("pineapple");
         System.out.println(first);
         System.out.println(second);
     }
