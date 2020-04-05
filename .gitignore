@@ -1,5 +1,6 @@
 .idea
 nbproject
+src/main/resources/user
 
 # Compiled class file
 *.class
