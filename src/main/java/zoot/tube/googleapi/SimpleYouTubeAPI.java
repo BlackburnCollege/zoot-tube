@@ -24,7 +24,7 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
     }
 
     @Override
-    public List<Playlist> getMyPlaylists() {
+    public List<ZTPlaylist> getMyPlaylists() {
         YouTube youtubeService = this.authorizer.getService();
         YouTube.Playlists.List request;
         PlaylistListResponse response;
@@ -39,16 +39,20 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
             return null;
         }
 
-        List<Playlist> playlists = new ArrayList<>();
+        List<ZTPlaylist> playlists = new ArrayList<>();
         for (com.google.api.services.youtube.model.Playlist playlist : response.getItems()) {
-            playlists.add(new Playlist(playlist.getSnippet().getTitle(), playlist.getId()));
+            playlists.add(new ZTPlaylist(
+                    playlist.getId(),
+                    playlist.getSnippet().getTitle(),
+                    playlist.getSnippet().getDescription())
+            );
         }
 
         return playlists;
     }
 
     @Override
-    public List<Video> getVideosFromPlaylist(String id) {
+    public List<ZTVideo> getVideosFromPlaylist(String id) {
         YouTube youtubeService = this.authorizer.getService();
         YouTube.PlaylistItems.List request;
         PlaylistItemListResponse response;
@@ -64,16 +68,16 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
             return null;
         }
 
-        List<Video> videos = new ArrayList<>();
+        List<ZTVideo> videos = new ArrayList<>();
         for (PlaylistItem video : response.getItems()) {
-            videos.add(new Video(video.getSnippet().getTitle(), video.getId()));
+            videos.add(new ZTVideo(video.getSnippet().getTitle(), video.getId()));
         }
 
         return videos;
     }
 
     @Override
-    public boolean setPlaylistVisibility(String id, String title, PrivacyStatus privacyStatus) {
+    public boolean setPlaylistVisibility(String id, String title, String description, PrivacyStatus privacyStatus) {
         YouTube youtubeService = this.authorizer.getService();
 
         com.google.api.services.youtube.model.Playlist playlist = new com.google.api.services.youtube.model.Playlist();
@@ -82,6 +86,7 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
         // THIS WILL OVERWRITE THE DESCRIPTION TO NOTHING
         PlaylistSnippet snippet = new PlaylistSnippet();
         snippet.setTitle(title);
+        snippet.setDescription(description);
         playlist.setSnippet(snippet);
 
         String statusMessage = privacyStatus.toString().toLowerCase();
