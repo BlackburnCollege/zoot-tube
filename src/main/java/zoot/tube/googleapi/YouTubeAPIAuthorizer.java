@@ -17,6 +17,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
+ * Handles the authentication of a user to give this app access
+ * to their YouTube account and store a long-term refresh-token.
+ * <p>
+ * Every call to the YouTube API SHOULD ask for a fresh YouTube object
+ * using the {@link YouTubeAPIAuthorizer#getService()} method. This
+ * is due to the stored HttpTransport object potentially becoming
+ * stale over time, which may cause Exceptions to be thrown.
+ * <p>
  * Source: https://developers.google.com/youtube/v3/docs
  */
 public class YouTubeAPIAuthorizer {
@@ -121,7 +129,7 @@ public class YouTubeAPIAuthorizer {
     /**
      * Build and return an authorized API client service.
      *
-     * @return an authorized API client service
+     * @return an authorized API client service.
      */
     public YouTube getService() {
         NetHttpTransport httpTransport;

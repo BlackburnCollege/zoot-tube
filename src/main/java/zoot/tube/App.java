@@ -3,8 +3,10 @@
  */
 package zoot.tube;
 
-import com.google.api.services.youtube.model.SearchListResponse;
-import zoot.tube.googleapi.YouTubeAPI;
+import java.util.List;
+import zoot.tube.googleapi.Playlist;
+import zoot.tube.googleapi.SimpleYouTubeAPI;
+import zoot.tube.googleapi.Video;
 
 public class App {
     public String getGreeting() {
@@ -12,10 +14,13 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        YouTubeAPI youtubeAPI = new YouTubeAPI("cordell-blackburn");
-        SearchListResponse first = youtubeAPI.search("pizza");
-        SearchListResponse second = youtubeAPI.search("pineapple");
-        System.out.println(first);
-        System.out.println(second);
+        SimpleYouTubeAPI youtubeAPI = new SimpleYouTubeAPI("junior-zoot");
+        List<Playlist> playlists = youtubeAPI.getMyPlaylists();
+        System.out.println(playlists);
+
+        for (Playlist playlist : playlists) {
+            List<Video> videos = youtubeAPI.getVideosFromPlaylist(playlist.id);
+            System.out.println(videos);
+        }
     }
 }
