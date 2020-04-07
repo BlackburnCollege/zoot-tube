@@ -19,8 +19,7 @@ public class App {
         System.out.println(playlists);
 
         for (Playlist playlist : playlists) {
-            List<Video> videos = youtubeAPI.getVideosFromPlaylist(playlist.id);
-            System.out.println(videos);
+            youtubeAPI.setPlaylistVisibility(playlist.id, playlist.name, SimpleYouTubeAPI.PrivacyStatus.UNLISTED);
         }
     }
 }
