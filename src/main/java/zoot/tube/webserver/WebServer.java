@@ -3,7 +3,10 @@ package zoot.tube.webserver;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 public class WebServer {
@@ -25,16 +28,24 @@ public class WebServer {
 
     private void initDefaultPaths() {
         this.addExchange("/", exchange -> {
-            File index = new File(String.format("%s%s", PAGES_PATH, "index.html"));
-            this.sendFile(exchange, index, ContentType.HTML);
+            if (exchange.getRequestMethod().equals("GET")) {
+                File index = new File(String.format("%s%s", PAGES_PATH, "index.html"));
+                this.sendFile(exchange, index, ContentType.HTML);
+            } else {
+                System.out.println("Duck off!");
+            }
         });
 
         this.addExchange("/scripts/", exchange -> {
-            String scriptRequested = exchange.getRequestURI().toASCIIString();
-            scriptRequested = scriptRequested.substring("/scripts/".length());
+            if (exchange.getRequestMethod().equals("GET")) {
+                String scriptRequested = exchange.getRequestURI().toASCIIString();
+                scriptRequested = scriptRequested.substring("/scripts/".length());
 
-            File script = new File(String.format("%s%s", SCRIPTS_PATH, scriptRequested));
-            this.sendFile(exchange, script, ContentType.JAVASCRIPT);
+                File script = new File(String.format("%s%s", SCRIPTS_PATH, scriptRequested));
+                this.sendFile(exchange, script, ContentType.JAVASCRIPT);
+            } else {
+                System.out.println("Duck off!");
+            }
         });
     }
 
