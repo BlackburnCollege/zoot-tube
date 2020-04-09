@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleYouTubeAPI implements YouTubeAPI{
-
-    public enum PrivacyStatus {
-        PRIVATE, PUBLIC, UNLISTED
-    }
+/**
+ * An implementation of the {@link YouTubeAPI} interface.
+ */
+public class SimpleYouTubeAPI implements YouTubeAPI {
 
     /**
      * Every call to the YouTube service must get a fresh instance of
@@ -19,10 +18,18 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
      */
     private final YouTubeAPIAuthorizer authorizer;
 
+    /**
+     * Creates an authorized YouTube API connection using the specified user.
+     *
+     * @param user the account owner.
+     */
     public SimpleYouTubeAPI(String user) {
         this.authorizer = new YouTubeAPIAuthorizer(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<ZTPlaylist> getMyPlaylists() {
         YouTube youtubeService = this.authorizer.getService();
@@ -51,6 +58,9 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
         return playlists;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<ZTVideo> getVideosFromPlaylist(String id) {
         YouTube youtubeService = this.authorizer.getService();
@@ -76,6 +86,17 @@ public class SimpleYouTubeAPI implements YouTubeAPI{
         return videos;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean setPlaylistVisibility(ZTPlaylist playlist, PrivacyStatus privacyStatus) {
+        return this.setPlaylistVisibility(playlist.id, playlist.title, playlist.description, privacyStatus);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean setPlaylistVisibility(String id, String title, String description, PrivacyStatus privacyStatus) {
         YouTube youtubeService = this.authorizer.getService();

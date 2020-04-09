@@ -24,10 +24,20 @@ public interface YouTubeAPI {
     /**
      * Sets the privacy status of a playlist.
      *
-     * @param id
-     * @param title
-     * @param privacyStatus
-     * @return
+     * @param playlist the playlist object to update.
+     * @param privacyStatus the privacy status.
+     * @return true if the change succeeded, otherwise false.
      */
-    boolean setPlaylistVisibility(String id, String title, String description, SimpleYouTubeAPI.PrivacyStatus privacyStatus);
+    boolean setPlaylistVisibility(ZTPlaylist playlist, PrivacyStatus privacyStatus);
+
+    /**
+     * Sets the privacy status of a playlist.
+     *
+     * @param id the ID of the video.
+     * @param title the title of the video.
+     * @param description the description of the video.
+     * @param privacyStatus the privacy status.
+     * @return true if the change succeeded, otherwise false.
+     */
+    boolean setPlaylistVisibility(String id, String title, String description, PrivacyStatus privacyStatus);
 }
