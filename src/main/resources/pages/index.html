@@ -15,12 +15,13 @@
         <script>
             function httpSend(theUrl) {
                 let xhr = new XMLHttpRequest();
-                xhr.open('post', theUrl);
                 xhr.onreadystatechange = function () {
-                    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    if (this.readyState === 4) {
                         console.log('hello');
+                        alert(xhr.response)
                     }
                 }
+                xhr.open('post', theUrl, true);
                 xhr.send();
             }
         </script>

@@ -63,6 +63,7 @@ public class WebServer {
         this.addExchange("/api/", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
                 System.out.println(exchange.getRequestURI().toASCIIString());
+                exchange.getResponseBody().close();
             }
         });
     }
