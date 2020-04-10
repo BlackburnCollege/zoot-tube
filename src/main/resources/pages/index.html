@@ -21,7 +21,7 @@
                 alert(xhr.response);
             }
         }
-        xhr.open('get', 'https://google.com', true);
+        xhr.open('get', 'localhost:8080/api', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.send();
     }

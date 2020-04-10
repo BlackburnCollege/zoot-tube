@@ -19,7 +19,7 @@ public class App {
         YouTubeAPI youtube = new SimpleYouTubeAPI("cordell-personal");
         Thread serverThread = new Thread(() -> {
             try {
-                new WebServer();
+                new WebServer(youtube);
             } catch (IOException e) {
                 System.out.println("Something Ducked Up");
                 e.printStackTrace();
