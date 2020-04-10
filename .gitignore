@@ -1,3 +1,9 @@
+.idea
+nbproject
+src/main/resources/users/*
+!src/main/resources/users/DoNotDeleteMe.txt
+!src/main/resources/users/junior-zoot
+
 # Compiled class file
 *.class
 
