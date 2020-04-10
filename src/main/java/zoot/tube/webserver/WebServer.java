@@ -3,6 +3,9 @@ package zoot.tube.webserver;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+
+import zoot.tube.googleapi.YouTubeAPI;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,9 +18,12 @@ public class WebServer {
     private static final String PAGES_PATH = "src/main/resources/pages/";
     private static final String SCRIPTS_PATH = "src/main/resources/scripts/";
 
+    private YouTubeAPI youtube;
+
     private final HttpServer server;
 
-    public WebServer() throws IOException {
+    public WebServer(YouTubeAPI youtube) throws IOException {
+        this.youtube = youtube;
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         this.initDefaultPaths();
@@ -45,6 +51,16 @@ public class WebServer {
                 this.sendFile(exchange, script, ContentType.JAVASCRIPT);
             } else {
                 System.out.println("Duck off!");
+            }
+        });
+
+        this.addAPIHandlers();
+    }
+
+    private void addAPIHandlers() {
+        this.addExchange("/api/", exchange -> {
+            if (exchange.getRequestMethod().equals("POST")) {
+                System.out.println(exchange.getRequestBody());
             }
         });
     }

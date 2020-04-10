@@ -10,7 +10,23 @@
     </div>
     <div id="app"></div>
 
-    <script src="scripts/index.js"></script>
+    <h5>Start Ad-Placer!</h5>
+<input type="submit" value="Start" onclick="submit()">
+
+<script type="text/javascript">
+    function submit() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                alert(xhr.response);
+            }
+        }
+        xhr.open('get', 'https://google.com', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        xhr.send();
+    }
+
+</script>
 </body>
 
 </html>

@@ -8,6 +8,7 @@ import zoot.tube.webserver.WebServer;
 import java.util.List;
 import zoot.tube.googleapi.ZTPlaylist;
 import zoot.tube.googleapi.SimpleYouTubeAPI;
+import zoot.tube.googleapi.YouTubeAPI;
 
 public class App {
     public String getGreeting() {
@@ -15,6 +16,7 @@ public class App {
     }
 
     public static void main(String[] args) {
+        YouTubeAPI youtube = new SimpleYouTubeAPI("cordell-personal");
         Thread serverThread = new Thread(() -> {
             try {
                 new WebServer();
