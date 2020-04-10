@@ -1,6 +1,10 @@
 .idea
 nbproject
 src/main/resources/users/*
+.settings
+bin
+.classpath
+.project
 !src/main/resources/users/DoNotDeleteMe.txt
 !src/main/resources/users/junior-zoot
 
