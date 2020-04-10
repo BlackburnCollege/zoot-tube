@@ -39,6 +39,7 @@ public class WebServer {
                 this.sendFile(exchange, index, ContentType.HTML);
             } else {
                 System.out.println("Duck off!");
+                System.out.println(exchange.getRequestURI().toASCIIString());
             }
         });
 
@@ -51,6 +52,7 @@ public class WebServer {
                 this.sendFile(exchange, script, ContentType.JAVASCRIPT);
             } else {
                 System.out.println("Duck off!");
+                System.out.println(exchange.getRequestURI().toASCIIString());
             }
         });
 
@@ -60,7 +62,7 @@ public class WebServer {
     private void addAPIHandlers() {
         this.addExchange("/api/", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
-                System.out.println(exchange.getRequestBody());
+                System.out.println(exchange.getRequestURI().toASCIIString());
             }
         });
     }

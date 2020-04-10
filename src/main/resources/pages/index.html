@@ -1,32 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <title>Hello World!</title>
-</head>
-<body>
-    <div>
-        Hello,World!
-    </div>
-    <div id="app"></div>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Hello World!</title>
+    </head>
+    <body>
+        <div>
+            Hello,World!
+        </div>
+        <div id="app"></div>
 
-    <h5>Start Ad-Placer!</h5>
-<input type="submit" value="Start" onclick="submit()">
 
-<script type="text/javascript">
-    function submit() {
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                alert(xhr.response);
+        <button onclick="httpSend('http://localhost:8080/api/test')">Send HTTP Request</button>
+        <script>
+            function httpSend(theUrl) {
+                let xhr = new XMLHttpRequest();
+                xhr.open('post', theUrl);
+                xhr.onreadystatechange = function () {
+                    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                        console.log('hello');
+                    }
+                }
+                xhr.send();
             }
-        }
-        xhr.open('get', 'localhost:8080/api', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-        xhr.send();
-    }
-
-</script>
-</body>
+        </script>
+    </body>
 
 </html>
