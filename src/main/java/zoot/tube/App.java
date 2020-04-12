@@ -16,7 +16,7 @@ public class App {
     }
 
     public static void main(String[] args) {
-        YouTubeAPI youtube = new SimpleYouTubeAPI("cordell-personal");
+        YouTubeAPI youtube = new SimpleYouTubeAPI("junior-zoot");
         Thread serverThread = new Thread(() -> {
             try {
                 new WebServer(youtube);
