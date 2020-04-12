@@ -17,11 +17,17 @@
                 let xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
                     if (this.readyState === 4) {
-                        console.log('hello');
-                        alert(xhr.response)
+                        var response = xhr.response;
+                        var app = document.getElementById('app');
+                        response.data.forEach( (playlist) => {
+                            var para = document.createElement('p');
+                            para.innerHTML = playlist.title;
+                            app.append(para);
+                        })
                     }
                 }
                 xhr.open('post', theUrl, true);
+                xhr.responseType = "json";
                 xhr.send();
             }
         </script>
