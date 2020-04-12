@@ -18,12 +18,12 @@ public class WebServer {
     private static final String PAGES_PATH = "src/main/resources/pages/";
     private static final String SCRIPTS_PATH = "src/main/resources/scripts/";
 
-    private YouTubeAPI youtube;
+    private YouTubeAPIWebAdapter youtube;
 
     private final HttpServer server;
 
     public WebServer(YouTubeAPI youtube) throws IOException {
-        this.youtube = youtube;
+        this.youtube = new YouTubeAPIWebAdapter(youtube);
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         this.initDefaultPaths();
@@ -39,6 +39,7 @@ public class WebServer {
                 this.sendFile(exchange, index, ContentType.HTML);
             } else {
                 System.out.println("Duck off!");
+                System.out.println(exchange.getRequestURI().toASCIIString());
             }
         });
 
@@ -51,6 +52,7 @@ public class WebServer {
                 this.sendFile(exchange, script, ContentType.JAVASCRIPT);
             } else {
                 System.out.println("Duck off!");
+                System.out.println(exchange.getRequestURI().toASCIIString());
             }
         });
 
@@ -58,11 +60,22 @@ public class WebServer {
     }
 
     private void addAPIHandlers() {
-        this.addExchange("/api/", exchange -> {
+        this.addExchange("/api/getmyplaylists", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
-                System.out.println(exchange.getRequestBody());
+                this.sendJson(exchange, this.youtube.getMyPlaylistsAsJsonString());
             }
         });
+    }
+
+    private void sendJson(HttpExchange exchange, String json) throws IOException {
+        byte[] response = json.getBytes();
+        exchange.getResponseHeaders().add("Content-Type", ContentType.JSON);
+        exchange.sendResponseHeaders(200, response.length);
+
+        OutputStream out = exchange.getResponseBody();
+        out.write(response);
+        out.flush();
+        out.close();
     }
 
     private void sendFile(HttpExchange exchange, File file, String type) throws IOException {
