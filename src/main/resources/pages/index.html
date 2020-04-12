@@ -10,7 +10,6 @@
         </div>
         <div id="app"></div>
 
-
         <button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
         <script>
             function httpSend(theUrl) {
@@ -18,12 +17,7 @@
                 xhr.onreadystatechange = function () {
                     if (this.readyState === 4) {
                         var response = xhr.response;
-                        var app = document.getElementById('app');
-                        response.data.forEach( (playlist) => {
-                            var para = document.createElement('p');
-                            para.innerHTML = playlist.title;
-                            app.append(para);
-                        })
+
                     }
                 }
                 xhr.open('post', theUrl, true);
@@ -32,5 +26,4 @@
             }
         </script>
     </body>
-
 </html>
