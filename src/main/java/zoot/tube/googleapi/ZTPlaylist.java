@@ -12,6 +12,10 @@ public class ZTPlaylist {
         this.description = description;
     }
 
+    public String toJsonString() {
+        return String.format("{\"id\":\"%s\",\"title\":\"%s\",\"description\":\"%s\"}", this.id, this.title, this.description);
+    }
+
     public String toString() {
         return String.format("Playlist | id: %s | Title: %s | Description: %s", this.id, this.title, this.description);
     }

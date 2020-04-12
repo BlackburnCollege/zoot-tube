@@ -62,10 +62,20 @@ public class WebServer {
     private void addAPIHandlers() {
         this.addExchange("/api/getmyplaylists", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
-                System.out.println(exchange.getRequestURI().toASCIIString());
-                exchange.getResponseBody().close();
+                this.sendJson(exchange, this.youtube.getMyPlaylistsAsJsonString());
             }
         });
+    }
+
+    private void sendJson(HttpExchange exchange, String json) throws IOException {
+        byte[] response = json.getBytes();
+        exchange.getResponseHeaders().add("Content-Type", ContentType.JSON);
+        exchange.sendResponseHeaders(200, response.length);
+
+        OutputStream out = exchange.getResponseBody();
+        out.write(response);
+        out.flush();
+        out.close();
     }
 
     private void sendFile(HttpExchange exchange, File file, String type) throws IOException {

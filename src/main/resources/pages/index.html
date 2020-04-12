@@ -10,21 +10,20 @@
         </div>
         <div id="app"></div>
 
-
         <button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
         <script>
             function httpSend(theUrl) {
                 let xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
                     if (this.readyState === 4) {
-                        console.log('hello');
-                        alert(xhr.response)
+                        var response = xhr.response;
+
                     }
                 }
                 xhr.open('post', theUrl, true);
+                xhr.responseType = "json";
                 xhr.send();
             }
         </script>
     </body>
-
 </html>
