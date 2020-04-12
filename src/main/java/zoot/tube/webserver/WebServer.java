@@ -18,12 +18,12 @@ public class WebServer {
     private static final String PAGES_PATH = "src/main/resources/pages/";
     private static final String SCRIPTS_PATH = "src/main/resources/scripts/";
 
-    private YouTubeAPI youtube;
+    private YouTubeAPIWebAdapter youtube;
 
     private final HttpServer server;
 
     public WebServer(YouTubeAPI youtube) throws IOException {
-        this.youtube = youtube;
+        this.youtube = new YouTubeAPIWebAdapter(youtube);
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         this.initDefaultPaths();
@@ -60,7 +60,7 @@ public class WebServer {
     }
 
     private void addAPIHandlers() {
-        this.addExchange("/api/", exchange -> {
+        this.addExchange("/api/getmyplaylists", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
                 System.out.println(exchange.getRequestURI().toASCIIString());
                 exchange.getResponseBody().close();
