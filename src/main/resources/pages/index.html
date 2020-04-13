@@ -12,12 +12,23 @@
 
         <button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
         <script>
+            function displayData(data){
+                return `
+                <div>
+                    <p>${data.id}</p>
+                    <p>${data.title}</p>
+                    <p>${data.description}</p>
+                </div>
+                `
+            }
             function httpSend(theUrl) {
                 let xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function () {
                     if (this.readyState === 4) {
                         var response = xhr.response;
-
+                        document.getElementById("app").innerHTML =`                            
+                        ${response.data.map(displayData).join('')}
+                        `
                     }
                 }
                 xhr.open('post', theUrl, true);
