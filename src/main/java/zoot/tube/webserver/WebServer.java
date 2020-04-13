@@ -4,13 +4,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import java.io.*;
 import zoot.tube.googleapi.YouTubeAPI;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import zoot.tube.googleapi.YouTubeAPIAuthorizer;
 
 public class WebServer {
 
@@ -19,6 +17,7 @@ public class WebServer {
     private static final String SCRIPTS_PATH = "src/main/resources/scripts/";
 
     private YouTubeAPIWebAdapter youtube;
+    private YouTubeAPIAuthorizer authorizer = new YouTubeAPIAuthorizer();
 
     private final HttpServer server;
 
@@ -64,6 +63,13 @@ public class WebServer {
         this.addExchange("/api/getmyplaylists", exchange -> {
             if (exchange.getRequestMethod().equals("POST")) {
                 this.sendJson(exchange, this.youtube.getMyPlaylistsAsJsonString());
+            }
+        });
+
+        this.addExchange("/api/storeAuthCode", exchange -> {
+            if (exchange.getRequestMethod().equals("POST")) {
+                InputStream is = exchange.getRequestBody();
+                this.authorizer.getAuthFromCode("");
             }
         });
     }

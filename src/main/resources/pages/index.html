@@ -1,29 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <title>Hello World!</title>
-    </head>
-    <body>
-        <div>
-            Hello,World!
-        </div>
-        <div id="app"></div>
+<head>
+    <meta charset="utf-8"/>
+    <title>Hello World!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+    </script>
+    <script>
+        function start() {
+            gapi.load('auth2', function () {
+                auth2 = gapi.auth2.init({
+                    client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+                    // Scopes to request in addition to 'profile' and 'email'
+                    //scope: 'additional_scope'
+                });
+            });
+        }
+    </script>
 
-        <button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
-        <script>
-            function httpSend(theUrl) {
-                let xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    if (this.readyState === 4) {
-                        var response = xhr.response;
+</head>
+<body>
+<div>
+    <button id="signinButton">Sign in with Google</button>
+    <script>
+        $('#signinButton').click(function () {
+            // signInCallback defined in step 6.
+            auth2.grantOfflineAccess().then(signInCallback);
+        });
+    </script>
 
-                    }
-                }
-                xhr.open('post', theUrl, true);
-                xhr.responseType = "json";
-                xhr.send();
+</div>
+<div>
+    Hello,World!
+</div>
+<div id="app"></div>
+
+<button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
+<script>
+    function httpSend(theUrl) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var response = xhr.response;
+
             }
-        </script>
-    </body>
+        }
+        xhr.open('post', theUrl, true);
+        xhr.responseType = "json";
+        xhr.send();
+    }
+</script>
+
+<script>
+    function signInCallback(authResult) {
+        if (authResult['code']) {
+            // Hide the sign-in button now that the user is authorized, for example:
+            $('#signinButton').attr('style', 'display: none');
+
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/storeAuthCode',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function (result) {
+                    // Handle or verify the server response.
+                },
+                processData: false,
+                data: authResult['code']
+            });
+        } else {
+            // There was an error.
+        }
+    }
+</script>
+
+</body>
 </html>

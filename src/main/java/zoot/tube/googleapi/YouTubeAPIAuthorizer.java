@@ -4,7 +4,9 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -38,12 +40,13 @@ public class YouTubeAPIAuthorizer {
     );
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-    private final String user;
+    private String user;
     private Credential credential = null;
 
-    public YouTubeAPIAuthorizer(String user) {
-        this.user = user;
-    }
+//    public YouTubeAPIAuthorizer(String user) {
+//        this.user = user;
+//    }
+
 
     /**
      * Creates an authorized Credential object and stores the refresh-token.
@@ -61,6 +64,53 @@ public class YouTubeAPIAuthorizer {
         }
 
         return this.credential;
+    }
+
+    public Credential getAuthFromCode(String code) {
+        GoogleClientSecrets clientSecrets;
+        try {
+            clientSecrets = GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRETS_URL));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        GoogleTokenResponse tokenResponse;
+        try {
+            tokenResponse = new GoogleAuthorizationCodeTokenRequest(
+                    new NetHttpTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    "https://oath2.googleapis.com/token",
+                    clientSecrets.getDetails().getClientId(),
+                    clientSecrets.getDetails().getClientSecret(),
+                    code,
+                    "http:localhost:8080"
+                    ).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        Credential credential;
+        credential = new Builder()
+                .setTransport(new NetHttpTransport())
+                .setJsonFactory(JSON_FACTORY)
+                .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
+                .build();
+        credential.setAccessToken(tokenResponse.getAccessToken());
+        try {
+            credential.refreshToken();
+        } catch (IOException e) {
+            // Refreshing the token failed.
+            credential = null;
+        }
+
+        try {
+            RefreshTokenSaver.saveRefreshToken(tokenResponse.parseIdToken().getPayload().getEmail(), credential.getRefreshToken());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return credential;
     }
 
     private Credential attemptCreateCredentialUsingRefreshToken(String user, HttpTransport httpTransport) {
