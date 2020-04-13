@@ -29,6 +29,7 @@ public class WebServer {
         this.initDefaultPaths();
 
         System.out.println("Starting local server on port: " + PORT);
+        System.out.println("http://localhost:8080/");
         server.start();
     }
 
