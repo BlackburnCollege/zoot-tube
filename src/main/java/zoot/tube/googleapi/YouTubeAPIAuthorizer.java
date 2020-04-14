@@ -1,9 +1,6 @@
 package zoot.tube.googleapi;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -13,10 +10,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
-import java.io.*;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * Handles the authentication of a user to give this app access
@@ -31,148 +27,54 @@ import java.util.Collection;
  */
 public class YouTubeAPIAuthorizer {
 
-    private static final String CLIENT_SECRETS_URL = "src/main/resources/client_secret.json";
-    private static final String CLIENT_ID = "991685953336-aa5vls4tv34fk6sa6u0t6m0po065kec4.apps.googleusercontent.com";
-    private static final String CLIENT_SECRET = "FllR3ZmJmlU44JnMK7STXBKj";
-    private static final String APPLICATION_NAME = "Zoot Tube";
-    private static final Collection<String> SCOPES = Arrays.asList(
-            "https://www.googleapis.com/auth/youtube.force-ssl"
-    );
+//    private static final String CLIENT_SECRETS_URL = "src/main/resources/client_secret.json";
+//    private static final String CLIENT_ID = "991685953336-aa5vls4tv34fk6sa6u0t6m0po065kec4.apps.googleusercontent.com";
+//    private static final String CLIENT_SECRET = "FllR3ZmJmlU44JnMK7STXBKj";
+//    private static final Collection<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl");
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final String CLIENT_SECRETSV2_URL = "src/main/resources/client_secretsv2.json";
+    private static final String APPLICATION_NAME = "Zoot Tube";
 
-    private String user;
-    private Credential credential = null;
+    private Credential credential;
 
-//    public YouTubeAPIAuthorizer(String user) {
-//        this.user = user;
-//    }
-
-
-    /**
-     * Creates an authorized Credential object and stores the refresh-token.
-     *
-     * @return an authorized Credential object.
-     */
-    private Credential authorize(final NetHttpTransport httpTransport) {
-        // If the credential is null, try loading a saved refresh token for the user and generate a new credential.
-        if (this.credential == null) {
-            this.credential = this.attemptCreateCredentialUsingRefreshToken(this.user, httpTransport);
-        }
-        // If there is still no credential token, get a new credential and save the refresh token.
-        if (this.credential == null) {
-            this.credential = this.createNewCredential(this.user, httpTransport);
-        }
-
-        return this.credential;
-    }
-
-    public Credential getAuthFromCode(String code) {
-        GoogleClientSecrets clientSecrets;
+    public YouTubeAPIAuthorizer(String userHash) throws NoRefreshTokenFound {
         try {
-            clientSecrets = GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRETS_URL));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            this.credential = this.attemptCreateCredentialUsingRefreshToken(userHash, GoogleNetHttpTransport.newTrustedTransport());
+            if (this.credential == null) {
+                throw new NoRefreshTokenFound();
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            System.err.println("Failed to create transport.");
+            throw new NoRefreshTokenFound();
         }
-        GoogleTokenResponse tokenResponse;
-        try {
-            tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                    new NetHttpTransport(),
-                    JacksonFactory.getDefaultInstance(),
-                    "https://oath2.googleapis.com/token",
-                    clientSecrets.getDetails().getClientId(),
-                    clientSecrets.getDetails().getClientSecret(),
-                    code,
-                    "http:localhost:8080"
-                    ).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        Credential credential;
-        credential = new Builder()
-                .setTransport(new NetHttpTransport())
-                .setJsonFactory(JSON_FACTORY)
-                .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
-                .build();
-        credential.setAccessToken(tokenResponse.getAccessToken());
-        try {
-            credential.refreshToken();
-        } catch (IOException e) {
-            // Refreshing the token failed.
-            credential = null;
-        }
-
-        try {
-            RefreshTokenSaver.saveRefreshToken(tokenResponse.parseIdToken().getPayload().getEmail(), credential.getRefreshToken());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return credential;
     }
 
     private Credential attemptCreateCredentialUsingRefreshToken(String user, HttpTransport httpTransport) {
         Credential credential = null;
         // Load the refresh-token for the user.
         String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
+        GoogleClientSecrets clientSecrets;
+        try {
+            clientSecrets = GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRETSV2_URL));
+        } catch (IOException e) {
+            System.err.println("Failed to load API credentials.");
+            return null;
+        }
         // If the refresh-token exists, create a new credential.
         if (refreshToken.length() > 0) {
             credential = new Builder()
                     .setTransport(httpTransport)
                     .setJsonFactory(JSON_FACTORY)
-                    .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
+                    .setClientSecrets(clientSecrets.getDetails().getClientId(), clientSecrets.getDetails().getClientSecret())
                     .build();
             credential.setRefreshToken(refreshToken);
             try {
                 credential.refreshToken();
             } catch (IOException e) {
-                // Refreshing the token failed.
+                System.err.println("Failed to refresh token.");
                 credential = null;
             }
         }
-        return credential;
-    }
-
-    private Credential createNewCredential(String user, HttpTransport httpTransport) {
-        Credential credential;
-        InputStream is;
-        try {
-            is = new FileInputStream(CLIENT_SECRETS_URL);
-        } catch (FileNotFoundException e) {
-            System.err.println("Client Secrets FileNotFound.");
-            return null; // Creating a Credential failed.
-        }
-
-        GoogleClientSecrets clientSecrets;
-        try {
-            clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(is));
-        } catch (IOException e) {
-            System.err.println("Failed to load Client Secrets using GoogleClientSecrets.load(JsonFactory, Reader).");
-            return null; // Creating a Credential failed.
-        }
-
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport,
-                JSON_FACTORY,
-                clientSecrets,
-                SCOPES
-        )
-                .setAccessType("offline")
-                .build();
-
-        try {
-            credential = new AuthorizationCodeInstalledApp(
-                    flow,
-                    new LocalServerReceiver()
-            ).authorize(user);
-        } catch (IOException e) {
-            System.err.println("Failed to authorize user.");
-            return null; // Creating a Credential failed.
-        }
-
-        RefreshTokenSaver.saveRefreshToken(user, credential.getRefreshToken());
         return credential;
     }
 
@@ -190,8 +92,49 @@ public class YouTubeAPIAuthorizer {
             e.printStackTrace();
             return null;
         }
-        Credential credential = authorize(httpTransport);
-        return new YouTube.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+        return new YouTube.Builder(httpTransport, JSON_FACTORY, this.credential).setApplicationName(APPLICATION_NAME).build();
+    }
+
+    public static Credential getCredentialFromCode(String code) {
+        GoogleClientSecrets clientSecrets;
+        try {
+            clientSecrets = GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new FileReader(CLIENT_SECRETSV2_URL));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        GoogleTokenResponse tokenResponse;
+        try {
+            tokenResponse = new GoogleAuthorizationCodeTokenRequest(
+                    new NetHttpTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    "https://oauth2.googleapis.com/token",
+                    clientSecrets.getDetails().getClientId(),
+                    clientSecrets.getDetails().getClientSecret(),
+                    code,
+                    "http://localhost:8080"
+            ).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        Credential credential;
+        credential = new Builder()
+                .setTransport(new NetHttpTransport())
+                .setJsonFactory(JSON_FACTORY)
+                .setClientSecrets(clientSecrets.getDetails().getClientId(), clientSecrets.getDetails().getClientSecret())
+                .build();
+        credential.setAccessToken(tokenResponse.getAccessToken());
+        credential.setRefreshToken(tokenResponse.getRefreshToken());
+
+        try {
+            RefreshTokenSaver.saveRefreshToken(tokenResponse.parseIdToken().getPayload().getEmail(), credential.getRefreshToken());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return credential;
     }
 
 }

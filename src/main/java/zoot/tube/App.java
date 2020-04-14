@@ -16,10 +16,10 @@ public class App {
     }
 
     public static void main(String[] args) {
-        YouTubeAPI youtube = new SimpleYouTubeAPI("junior-zoot");
+//        YouTubeAPI youtube = new SimpleYouTubeAPI("junior-zoot");
         Thread serverThread = new Thread(() -> {
             try {
-                new WebServer(youtube);
+                new WebServer();
             } catch (IOException e) {
                 System.out.println("Something Ducked Up");
                 e.printStackTrace();

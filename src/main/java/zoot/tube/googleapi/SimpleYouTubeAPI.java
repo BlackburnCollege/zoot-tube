@@ -21,13 +21,11 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
     /**
      * Creates an authorized YouTube API connection using the specified user.
      *
-     * @param user the account owner.
+     * @param userHash the account owner.
      */
-    public SimpleYouTubeAPI(String user) {
-        this.authorizer = new YouTubeAPIAuthorizer(user);
+    public SimpleYouTubeAPI(String userHash) {
+        this.authorizer = new YouTubeAPIAuthorizer(userHash);
     }
-
-
 
     /**
      * {@inheritDoc}
