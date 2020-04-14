@@ -42,6 +42,8 @@ public class WebServer {
         // Home page and invalid requests.
         this.addExchange("/", exchange -> {
             if (exchange.getRequestMethod().equals("GET")) {
+                // Need this to properly show/hide login button.
+                this.handleLoginCheck(exchange);
                 // Home page.
                 if (exchange.getRequestURI().toASCIIString().equals("/")) {
                     File index = new File(String.format("%s%s", PAGES_PATH, "index.html"));
@@ -165,16 +167,6 @@ public class WebServer {
         return map;
     }
 
-    private String getLoginHash(HttpExchange exchange) {
-        List<String> rawCookies = exchange.getRequestHeaders().get("Cookie");
-        HashMap<String, String> cookies = this.parseCookies(rawCookies);
-        if (cookies.containsKey("login")) {
-            String hash = cookies.get("login");
-            return WebServer.cleanHash(hash);
-        }
-        return "";
-    }
-
     private void sendJson(HttpExchange exchange, String json) throws IOException {
         byte[] response = json.getBytes();
         exchange.getResponseHeaders().add("Content-Type", ContentType.JSON);
@@ -214,16 +206,29 @@ public class WebServer {
 
     private YouTubeAPIWebAdapter handleLoginCheck(HttpExchange exchange) {
         String loginHash = this.getLoginHash(exchange);
-        if (!this.webAdapters.containsKey(loginHash) && loginHash.length() > 0) {
-            try {
-                return this.webAdapters.put(loginHash, new YouTubeAPIWebAdapter(new SimpleYouTubeAPI(loginHash)));
-            } catch (Exception e) {
-                System.out.println("Might be Invalid login");
-                e.printStackTrace();
-                return null;
+        if (loginHash.length() > 0) {
+            if (!this.webAdapters.containsKey(loginHash)) {
+                try {
+                    return this.webAdapters.put(loginHash, new YouTubeAPIWebAdapter(new SimpleYouTubeAPI(loginHash)));
+                } catch (Exception e) {
+                    System.out.println("Might be Invalid login");
+                    e.printStackTrace();
+                    return null;
+                }
             }
+            return this.webAdapters.get(loginHash);
         }
-        return this.webAdapters.get(loginHash);
+        return null;
+    }
+
+    private String getLoginHash(HttpExchange exchange) {
+        List<String> rawCookies = exchange.getRequestHeaders().get("Cookie");
+        HashMap<String, String> cookies = this.parseCookies(rawCookies);
+        if (cookies.containsKey("login")) {
+            String hash = cookies.get("login");
+            return WebServer.cleanHash(hash);
+        }
+        return "";
     }
 
 }
