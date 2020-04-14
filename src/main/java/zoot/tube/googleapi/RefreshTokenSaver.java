@@ -7,7 +7,7 @@ import java.io.*;
  */
 public final class RefreshTokenSaver {
 
-    private static String RESOURCES_USERS = "src/main/resources/users/";
+    private static String RESOURCES_USERS = "src/main/resources/users";
 
     /**
      * Saves a user's refresh-token to a file that can be loaded when
@@ -17,7 +17,7 @@ public final class RefreshTokenSaver {
      * @param refreshToken the refresh-token.
      */
     public static void saveRefreshToken(String user, String refreshToken) {
-        File file = new File(String.format("%s%s", RESOURCES_USERS, user));
+        File file = new File(String.format("%s/%s", RESOURCES_USERS, user));
         FileWriter writer = null;
         try {
             writer = new FileWriter(file);
@@ -45,7 +45,7 @@ public final class RefreshTokenSaver {
      * @return the refresh-token if it exists, otherwise an empty string.
      */
     public static String loadRefreshToken(String user) {
-        File file = new File(String.format("%s%s", RESOURCES_USERS, user));
+        File file = new File(String.format("%s/%s", RESOURCES_USERS, user));
         BufferedReader reader = null;
         String token = "";
         try {
@@ -64,4 +64,5 @@ public final class RefreshTokenSaver {
         }
         return token;
     }
+
 }

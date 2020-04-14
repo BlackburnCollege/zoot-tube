@@ -7,4 +7,5 @@ public final class ContentType {
     public static String JAVASCRIPT = "text/javascript";
     public static String PNG = "image/png";
     public static String HTML = "text/html";
+    public static String PLAIN = "text/plain";
 }

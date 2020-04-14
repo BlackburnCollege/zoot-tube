@@ -1,40 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <title>Hello World!</title>
-    </head>
-    <body>
-        <div>
-            Hello,World!
-        </div>
-        <div id="app"></div>
+<head>
+    <meta charset="utf-8"/>
+    <title>Hello World!</title>
+    <script src="https://apis.google.com/js/platform.js?onload=start" async defer></script>
+    <script>
+        function start() {
+            gapi.load('auth2', function () {
+                auth2 = gapi.auth2.init({
+                    client_id: '991685953336-su9qrdbh9egc8une72a09qko04kd69md.apps.googleusercontent.com',
+                    // Scopes to request in addition to 'profile' and 'email'
+                    scope: 'https://www.googleapis.com/auth/youtube.force-ssl'
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+<button id="signInButton" onclick="onSignIn()">Sign in</button>
+<script>
+    function onSignIn() {
+        // var authObject = auth2.getAuthInstance();
+        auth2.grantOfflineAccess().then(signInCallback).catch((err) => {
+            console.log(err);
+        });
+    }
+</script>
 
-        <button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Send HTTP Request</button>
-        <script>
-            function displayData(data){
-                return `
-                <div>
-                    <p>Title: ${data.title}</p>
-                    <p>ID: ${data.id}</p>
-                    <p>Description: ${data.description}</p>
-                </div>
-                `
+<button onclick="httpSend('http://localhost:8080/api/getmyplaylists')">Get My Playlists</button>
+<div id="app"></div>
+<script>
+    function displayData(data){
+        return `<div><p>Title: ${data.title}</p><p>ID: ${data.id}</p><p>Description: ${data.description}</p></div>`
+    }
+
+    function httpSend(theUrl) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var response = xhr.response;
+                document.getElementById("app").innerHTML =`${response.data.map(displayData).join('')}`
             }
-            function httpSend(theUrl) {
-                let xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    if (this.readyState === 4) {
-                        var response = xhr.response;
-                        document.getElementById("app").innerHTML =`                            
-                        ${response.data.map(displayData).join('')}
-                        `
-                    }
+        }
+        xhr.open('post', theUrl, true);
+        xhr.responseType = "json";
+        xhr.send();
+    }
+
+    function signInCallback(authResult) {
+        if (authResult['code']) {
+            // Hide the sign-in button now that the user is authorized, for example:
+            var button = document.getElementById("signInButton");
+            button.setAttribute("style", "display: none");
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (this.readyState === 4) {
+                    // handle response
                 }
-                xhr.open('post', theUrl, true);
-                xhr.responseType = "json";
-                xhr.send();
+            };
+            xhr.open('POST', 'http://localhost:8080/api/storeAuthCode', true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Content-Type', 'application/octet-stream; charset=utf-8');
+            xhr.send(authResult['code']);
+        } else {
+            console.log("ERROR")
+        }
+    }
+</script>
+
+<script>
+    function check() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState === 4) {
+                var response = xhr.response;
+                var button = document.getElementById('signInButton');
+                if (response.signedin === 'true') {
+                    button.setAttribute("style", "display: none");
+                }
             }
-        </script>
-    </body>
+        }
+        xhr.open('GET', "http://localhost:8080/api/issignedin", true);
+        xhr.responseType = "json";
+        xhr.send();
+    }
+    check();
+</script>
+
+</body>
 </html>
