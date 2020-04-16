@@ -41,10 +41,18 @@ public class App {
             System.out.println(message);
         });
 
+        File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
+        String url = home.getAbsolutePath();
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
             try {
                 Desktop.getDesktop().browse(home.toURI());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else{
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("xdg-open " + url);
             } catch (IOException e) {
                 e.printStackTrace();
             }

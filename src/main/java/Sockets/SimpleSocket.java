@@ -160,22 +160,22 @@ public class SimpleSocket extends WebSocketServer {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
-        int port = 55443;
-
-        SimpleSocket s = new SimpleSocket(port, (String str) -> {
-            System.out.println("I got an effing message: " + str);
-        });
-//        s.start();
-        System.out.println("ChatServer started on port: " + s.getPort());
-
-        s.addMessageHandler((String message) -> {
-            System.out.println("do stuff with message: " + message);
-        });
-        Thread.sleep(5000);
-        System.out.println("Sending message");
-        s.sendMessage("{\"key\": \"string value\", \"key2\" : true, \"key3\" : 3.159265}");
-    }
+//    public static void main(String[] args) throws InterruptedException, IOException {
+//        int port = 55443;
+//
+//        SimpleSocket s = new SimpleSocket(port, (String str) -> {
+//            System.out.println("I got an effing message: " + str);
+//        });
+////        s.start();
+//        System.out.println("ChatServer started on port: " + s.getPort());
+//
+//        s.addMessageHandler((String message) -> {
+//            System.out.println("do stuff with message: " + message);
+//        });
+//        Thread.sleep(5000);
+//        System.out.println("Sending message");
+//        s.sendMessage("{\"key\": \"string value\", \"key2\" : true, \"key3\" : 3.159265}");
+//    }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
