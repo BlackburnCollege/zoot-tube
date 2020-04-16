@@ -108,12 +108,12 @@ public class SimpleSocket extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-
         if (this.conn != null) {
             System.out.println("New connection established while previous connection existed. Closing old connection and replacing");
             conn.close();
         }
         this.conn = conn;
+        conn.send("{\"data\":\"Hello world!\"}");
 //        conn.send("Welcome to the server!"); //This method sends a message to the new client
 //        broadcast("new connection: " + handshake.getResourceDescriptor()); //This method sends a message to all clients connected
         System.out.println(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " has connected!");

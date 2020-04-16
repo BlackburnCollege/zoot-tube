@@ -3,30 +3,52 @@
  */
 package zoot.tube;
 
+import Sockets.SimpleSocket;
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.UnknownHostException;
 import zoot.tube.webserver.WebServer;
 import java.util.List;
 import zoot.tube.googleapi.ZTPlaylist;
 import zoot.tube.googleapi.SimpleYouTubeAPI;
 import zoot.tube.googleapi.YouTubeAPI;
+import zoot.tube.websocketwebserver.Server;
 
 public class App {
     public String getGreeting() {
         return "Hello world.";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
 //        YouTubeAPI youtube = new SimpleYouTubeAPI("junior-zoot");
-        Thread serverThread = new Thread(() -> {
+//        Thread serverThread = new Thread(() -> {
+//            try {
+//                new WebServer();
+//            } catch (IOException e) {
+//                System.out.println("Something Ducked Up");
+//                e.printStackTrace();
+//            }
+//        });
+//        serverThread.setDaemon(true);
+//        serverThread.start();
+//        Server server = new Server(8080);
+//        server.start();
+
+        SimpleSocket socket = new SimpleSocket(8080);
+        socket.addMessageHandler((String message) -> {
+            System.out.println(message);
+        });
+
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
             try {
-                new WebServer();
+                Desktop.getDesktop().browse(home.toURI());
             } catch (IOException e) {
-                System.out.println("Something Ducked Up");
                 e.printStackTrace();
             }
-        });
-        serverThread.setDaemon(true);
-        serverThread.start();
+        }
 
         while (true) {
             try {

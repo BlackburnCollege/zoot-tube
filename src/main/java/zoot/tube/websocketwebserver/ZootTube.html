@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Zoot Tube</title>
+</head>
+<body>
+
+<div id="app">
+
+</div>
+
+<script>
+    let socket = new WebSocket('ws://localhost:8080');
+    socket.onmessage = (messageWrapper) => {
+        const stringMessage = messageWrapper.data;
+        const asJSONObject = JSON.parse(stringMessage);
+        let app = document.getElementById('app');
+        let header = document.createElement('h1');
+        header.innerText = asJSONObject.data;
+        app.appendChild(header);
+    };
+    socket.onopen = () => {
+        socket.send("Test!")
+    };
+
+</script>
+</body>
+</html>
