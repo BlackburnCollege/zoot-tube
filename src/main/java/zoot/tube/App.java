@@ -47,12 +47,17 @@ public class App {
             try {
                 Desktop.getDesktop().browse(home.toURI());
             } catch (IOException e) {
-                e.printStackTrace();
+                Runtime runtime = Runtime.getRuntime();
+                try {
+                    runtime.exec("open " + url);
+                } catch (IOException ee) {
+                    ee.printStackTrace();
+                }
             }
         } else{
             Runtime runtime = Runtime.getRuntime();
             try {
-                runtime.exec("xdg-open " + url);
+                runtime.exec("open " + url);
             } catch (IOException e) {
                 e.printStackTrace();
             }
