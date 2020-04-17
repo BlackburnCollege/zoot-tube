@@ -47,6 +47,7 @@ public class YouTubeAPIAuthorizer {
             System.err.println("Failed to create transport.");
             throw new NoRefreshTokenFound();
         }
+
     }
 
     private Credential attemptCreateCredentialUsingRefreshToken(String user, HttpTransport httpTransport) {
