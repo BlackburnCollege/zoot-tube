@@ -1,130 +1,93 @@
 package zoot.tube.googleapi;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.*;
+import com.google.api.services.youtube.model.Playlist;
+import com.google.api.services.youtube.model.PlaylistListResponse;
+import com.google.api.services.youtube.model.PlaylistStatus;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * An implementation of the {@link YouTubeAPI} interface.
- */
-public class SimpleYouTubeAPI implements YouTubeAPI {
+public class SimpleYouTubeAPI {
 
-    /**
-     * Every call to the YouTube service must get a fresh instance of
-     * the service using this authorizer. The underlying HttpTransport
-     * Object may become stale over time, resulting in Exceptions.
-     */
-    private final YouTubeAPIAuthorizer authorizer;
+    private static final String APPLICATION_NAME = "Zoot Tube";
+    private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final String EMPTY_JSON = "{}";
 
-    /**
-     * Creates an authorized YouTube API connection using the specified user.
-     *
-     * @param userHash the account owner.
-     */
-    public SimpleYouTubeAPI(String userHash) {
-        this.authorizer = new YouTubeAPIAuthorizer(userHash);
+    private Credential credential;
+    private Gson gson = new GsonBuilder().create();
+
+    public SimpleYouTubeAPI(Credential credential) {
+        this.credential = credential;
+    }
+
+    private YouTube getService() {
+        return new YouTube.Builder(
+                GoogleUtil.getTrustedTransport(),
+                JSON_FACTORY,
+                credential
+        ).setApplicationName(APPLICATION_NAME).build();
     }
 
     /**
-     * {@inheritDoc}
+     * Gets all the playlists by the user.
+     * <p>
+     * The user is defined as the account the {@link Credential} in the
+     * constructor belongs to.
+     * <p>
+     * See https://developers.google.com/youtube/v3/docs/playlists#resource
+     * for the format.
+     *
+     * @return a JSON formatted String of the user's playlists.
      */
-    @Override
-    public List<ZTPlaylist> getMyPlaylists() {
-        YouTube youtubeService = this.authorizer.getService();
+    public String getMyPlaylists() {
+        YouTube youtube = this.getService();
+
         YouTube.Playlists.List request;
         PlaylistListResponse response;
         try {
-            request = youtubeService.playlists()
+            request = youtube.playlists()
                     .list("snippet,contentDetails")
                     .setMine(true)
             ;
             response = request.execute();
         } catch (IOException e) {
             System.err.println("Failed to retrieve user's playlists.");
-            return null;
+            return SimpleYouTubeAPI.EMPTY_JSON;
         }
 
-        List<ZTPlaylist> playlists = new ArrayList<>();
-        for (com.google.api.services.youtube.model.Playlist playlist : response.getItems()) {
-            playlists.add(new ZTPlaylist(
-                    playlist.getId(),
-                    playlist.getSnippet().getTitle(),
-                    playlist.getSnippet().getDescription())
-            );
-        }
-
-        return playlists;
+        return gson.toJson(response.getItems());
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the privacy of a playlist.
+     * <p>
+     * See https://developers.google.com/youtube/v3/docs/playlists#resource
+     * for the format.
+     *
+     * @param playlist      a JSON format of a YouTube playlist.
+     * @param privacyStatus the desired privacy status
+     * @return the resulting playlist JSON after the API call.
      */
-    @Override
-    public List<ZTVideo> getVideosFromPlaylist(String id) {
-        YouTube youtubeService = this.authorizer.getService();
-        YouTube.PlaylistItems.List request;
-        PlaylistItemListResponse response;
+    public String updatePlaylistVisibility(String playlist, PrivacyStatus privacyStatus) {
+        YouTube youtube = this.getService();
+
+        Playlist modelPlaylist = gson.fromJson(playlist, Playlist.class);
+        String status = privacyStatus.toString().toLowerCase();
+        modelPlaylist.setStatus(new PlaylistStatus().setPrivacyStatus(status));
+
+        Playlist response;
         try {
-            request = youtubeService.playlistItems()
-                    .list("snippet,contentDetails")
-                    .setMaxResults(50L)
-                    .setPlaylistId(id)
-            ;
+            YouTube.Playlists.Update request = youtube.playlists().update("snippet,status", modelPlaylist);
             response = request.execute();
         } catch (IOException e) {
-            System.err.println(String.format("Failed to retrieve videos in playlist with ID: %s", id));
-            return null;
+            System.err.println(String.format("Failed to update playlist privacy for playlist id: %s", modelPlaylist.getId()));
+            return playlist;
         }
 
-        List<ZTVideo> videos = new ArrayList<>();
-        for (PlaylistItem video : response.getItems()) {
-            videos.add(new ZTVideo(video.getSnippet().getTitle(), video.getId()));
-        }
-
-        return videos;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setPlaylistVisibility(ZTPlaylist playlist, PrivacyStatus privacyStatus) {
-        return this.setPlaylistVisibility(playlist.id, playlist.title, playlist.description, privacyStatus);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean setPlaylistVisibility(String id, String title, String description, PrivacyStatus privacyStatus) {
-        YouTube youtubeService = this.authorizer.getService();
-
-        com.google.api.services.youtube.model.Playlist playlist = new com.google.api.services.youtube.model.Playlist();
-        playlist.setId(id);
-
-        // THIS WILL OVERWRITE THE DESCRIPTION TO NOTHING
-        PlaylistSnippet snippet = new PlaylistSnippet();
-        snippet.setTitle(title);
-        snippet.setDescription(description);
-        playlist.setSnippet(snippet);
-
-        String statusMessage = privacyStatus.toString().toLowerCase();
-        PlaylistStatus status = new PlaylistStatus().setPrivacyStatus(statusMessage);
-        playlist.setStatus(status);
-
-        YouTube.Playlists.Update request;
-        com.google.api.services.youtube.model.Playlist response;
-        try {
-            request = youtubeService.playlists().update("snippet,status", playlist);
-            response = request.execute();
-        } catch (IOException e) {
-            System.err.println(String.format("Failed to update playlist privacy for playlist id: %s", id));
-            return false;
-        }
-
-        return response.getStatus().getPrivacyStatus().equals(statusMessage);
+        return gson.toJson(response);
     }
 
 }

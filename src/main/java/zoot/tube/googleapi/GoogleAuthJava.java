@@ -7,13 +7,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -22,9 +17,10 @@ import java.util.Collection;
  */
 public class GoogleAuthJava {
 
-    private final String clientSecretsUrl;
     private final Collection<String> scopes;
-    private final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private final GoogleUtil googleUtil = new GoogleUtil();
+    private final GoogleClientSecrets clientSecrets;
 
     /**
      * Creates this using the client secrets JSON file location and scopes specified.
@@ -36,8 +32,8 @@ public class GoogleAuthJava {
      * @param scopes           the scopes the client is requesting.
      */
     public GoogleAuthJava(String clientSecretsUrl, Collection<String> scopes) {
-        this.clientSecretsUrl = clientSecretsUrl;
         this.scopes = new ArrayList<>(scopes);
+        this.clientSecrets = GoogleUtil.getClientSecrets(clientSecretsUrl);
     }
 
     /**
@@ -81,16 +77,15 @@ public class GoogleAuthJava {
      */
     private Credential authorizeUsingUserCode(String code, String redirectUri) {
         Credential credential = this.createEmptyCredential();
-        GoogleClientSecrets clientSecrets = this.getClientSecrets();
 
         GoogleTokenResponse tokenResponse;
         try {
             tokenResponse = new GoogleAuthorizationCodeTokenRequest(
-                    this.getTrustedTransport(),
-                    JSON_FACTORY,
+                    GoogleUtil.getTrustedTransport(),
+                    this.jsonFactory,
                     "https://oauth2.googleapis.com/token",
-                    clientSecrets.getDetails().getClientId(),
-                    clientSecrets.getDetails().getClientSecret(),
+                    this.clientSecrets.getDetails().getClientId(),
+                    this.clientSecrets.getDetails().getClientSecret(),
                     code,
                     redirectUri
             ).execute();
@@ -131,13 +126,12 @@ public class GoogleAuthJava {
      * @return an empty Credential.
      */
     private Credential createEmptyCredential() {
-        GoogleClientSecrets clientSecrets = this.getClientSecrets();
         return new Builder()
-                .setTransport(this.getTrustedTransport())
-                .setJsonFactory(JSON_FACTORY)
+                .setTransport(GoogleUtil.getTrustedTransport())
+                .setJsonFactory(this.jsonFactory)
                 .setClientSecrets(
-                        clientSecrets.getDetails().getClientId(),
-                        clientSecrets.getDetails().getClientSecret()
+                        this.clientSecrets.getDetails().getClientId(),
+                        this.clientSecrets.getDetails().getClientSecret()
                 )
                 .build();
     }
@@ -148,53 +142,12 @@ public class GoogleAuthJava {
      * @return a GoogleAuthorizationCodeFlow for this client.
      */
     private GoogleAuthorizationCodeFlow getAuthorizationCodeFlow() {
-        NetHttpTransport httpTransport = this.getTrustedTransport();
         return new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport,
-                JSON_FACTORY,
-                this.getClientSecrets(),
-                scopes
+                GoogleUtil.getTrustedTransport(),
+                this.jsonFactory,
+                this.clientSecrets,
+                this.scopes
         ).build();
-    }
-
-    /**
-     * Loads the client credentials stored in a file.
-     * <p>
-     * If there is an error while loading the credentials, a blank
-     * credential will be returned.
-     *
-     * @return the client credentials.
-     */
-    private GoogleClientSecrets getClientSecrets() {
-        GoogleClientSecrets clientSecrets = new GoogleClientSecrets();
-        try {
-            clientSecrets = GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new FileReader(clientSecretsUrl));
-        } catch (FileNotFoundException e) {
-            System.err.println("GoogleAuthJava: Client Secrets File Not Found.");
-        } catch (IOException e) {
-            System.err.println("GoogleAuthJava: Error Reading Client Secrets.");
-            e.printStackTrace();
-        }
-        return clientSecrets;
-    }
-
-    /**
-     * Gets a {@link GoogleNetHttpTransport} trusted transport.
-     *
-     * @return a GoogleNetHttpTransport trusted transport.
-     */
-    private NetHttpTransport getTrustedTransport() {
-        NetHttpTransport httpTransport = null;
-        try {
-            httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        } catch (GeneralSecurityException e) {
-            System.err.println("GoogleAuthJava: GeneralSecurityException while creating Trusted Transport.");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.err.println("GoogleAuthJava: IOException while creating Trusted Transport.");
-            e.printStackTrace();
-        }
-        return httpTransport;
     }
 
 }

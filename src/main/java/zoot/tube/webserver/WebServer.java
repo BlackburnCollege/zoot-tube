@@ -13,7 +13,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import zoot.tube.googleapi.RefreshTokenSaver;
-import zoot.tube.googleapi.SimpleYouTubeAPI;
+import zoot.tube.googleapi.OldSimpleYouTubeAPI;
 import zoot.tube.googleapi.YouTubeAPIAuthorizer;
 
 public class WebServer {
@@ -209,7 +209,7 @@ public class WebServer {
         if (loginHash.length() > 0) {
             if (!this.webAdapters.containsKey(loginHash)) {
                 try {
-                    return this.webAdapters.put(loginHash, new YouTubeAPIWebAdapter(new SimpleYouTubeAPI(loginHash)));
+                    return this.webAdapters.put(loginHash, new YouTubeAPIWebAdapter(new OldSimpleYouTubeAPI(loginHash)));
                 } catch (Exception e) {
                     System.out.println("Might be Invalid login");
                     e.printStackTrace();
