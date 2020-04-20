@@ -8,6 +8,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 public class App {
     public String getGreeting() {
@@ -15,20 +16,6 @@ public class App {
     }
 
     public static void main(String[] args) throws UnknownHostException {
-//        YouTubeAPI youtube = new SimpleYouTubeAPI("junior-zoot");
-//        Thread serverThread = new Thread(() -> {
-//            try {
-//                new WebServer();
-//            } catch (IOException e) {
-//                System.out.println("Something Ducked Up");
-//                e.printStackTrace();
-//            }
-//        });
-//        serverThread.setDaemon(true);
-//        serverThread.start();
-//        Server server = new Server(8080);
-//        server.start();
-
         SimpleSocket socket = new SimpleSocket(8080);
         socket.addMessageHandler((String message) -> {
             System.out.println(message);
@@ -40,28 +27,22 @@ public class App {
             try {
                 Desktop.getDesktop().browse(home.toURI());
             } catch (IOException e) {
-                Runtime runtime = Runtime.getRuntime();
-                try {
-                    runtime.exec("open " + url);
-                } catch (IOException ee) {
-                    ee.printStackTrace();
-                }
-            }
-        } else{
-            Runtime runtime = Runtime.getRuntime();
-            try {
-                runtime.exec("open " + url);
-            } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Open this file in your web browser: " + url);
             }
         }
 
-        while (true) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+//        while (true) {
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+        Scanner input = new Scanner(System.in);
+        System.out.println("Press enter to close server.");
+        input.nextLine();
+
+        socket.shutdown();
     }
 }

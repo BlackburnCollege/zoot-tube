@@ -25,3 +25,7 @@ dependencies {
 application {
     mainClassName = 'zoot.tube.App'
 }
+
+run {
+    standardInput = System.in
+}
