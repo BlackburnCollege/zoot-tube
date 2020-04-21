@@ -1,43 +1,24 @@
 package zoot.tube.googleapi;
 
-import java.util.List;
-
+/**
+ * The required functionality for use in the app when interacting with a YouTubeAPI.
+ */
 public interface YouTubeAPI {
 
     /**
      * Gets a list of the current user's playlists and returns their
      * IDs and Titles.
      *
-     * @return the IDs and Titles of the current user's playlists.
+     * @return the playlists as a json.
      */
-    List<ZTPlaylist> getMyPlaylists();
-
-    /**
-     * Gets a list of the videos in a playlist, returning their IDs
-     * and Titles.
-     *
-     * @param playlistId the playlist ID.
-     * @return the IDs and Titles of the videos in the playlist.
-     */
-    List<ZTVideo> getVideosFromPlaylist(String playlistId);
+    String getMyPlaylists();
 
     /**
      * Sets the privacy status of a playlist.
      *
-     * @param playlist the playlist object to update.
+     * @param playlist      the playlist json.
      * @param privacyStatus the privacy status.
-     * @return true if the change succeeded, otherwise false.
+     * @return the resulting playlist.
      */
-    boolean setPlaylistVisibility(ZTPlaylist playlist, PrivacyStatus privacyStatus);
-
-    /**
-     * Sets the privacy status of a playlist.
-     *
-     * @param id the ID of the video.
-     * @param title the title of the video.
-     * @param description the description of the video.
-     * @param privacyStatus the privacy status.
-     * @return true if the change succeeded, otherwise false.
-     */
-    boolean setPlaylistVisibility(String id, String title, String description, PrivacyStatus privacyStatus);
+    String updatePlaylistVisibility(String playlist, PrivacyStatus privacyStatus);
 }
