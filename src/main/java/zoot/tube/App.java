@@ -105,7 +105,6 @@ public class App {
     }
 
     private void openWebPage() {
-//        File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
         File home = new File("src\\main\\resources\\website\\ZootTube.html");
         String url = home.getAbsolutePath();
         System.out.println("\nOpen this file in your web browser if it doesn't open automatically:\n" + url + "\n\n");
