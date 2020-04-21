@@ -35,26 +35,44 @@ public class App {
     private Gson gson = new GsonBuilder().create();
 
     public App() {
-        // no touchy!!!
+        // Get the user's Credential.
         String user = "user";
         Credential credential = this.getCredential(user);
-        youtubeAPI = new SimpleYouTubeAPI(credential);
-        // ============================================
 
-        // no touchy!!!
+        // Create the YouTubeAPI
+        youtubeAPI = new SimpleYouTubeAPI(credential);
+
+        // Create the web socket server.
         this.server = new Server(8080);
+        // Add message handlers to the server.
         this.addMessageHandlers();
+        // Start the server.
         this.server.start();
+
+        // Try to open the home page
         this.openWebPage();
+
+        // Shutdown when the user presses Enter a few times in the console.
         this.waitToClose();
-        // ============================================
     }
 
+    /**
+     * Adds message handlers to the server.
+     */
     private void addMessageHandlers() {
+        // Add a greeting handler.
+        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Butts"));
+
+        // Add a handler for requesting the user's playlists.
         this.server.addMessageHandler((message) -> {
+            // Parse the message.
             ApiRequest request = this.gson.fromJson(message, ApiRequest.class);
+
+            // Make sure the message is asking for the user's playlists.
             if (request.getHeader().equals("getMyPlaylists")) {
+                // Get the playlists.
                 String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+                // Package up the playlists into a response.
                 String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
@@ -62,15 +80,32 @@ public class App {
         });
     }
 
+    /**
+     * Use this to wrap the "data" into a String.
+     *
+     * @param header the header label
+     * @param data   the data to include.
+     * @return a JSON formatted string with the header and data filled in.
+     */
     private String wrapIntoJsonObject(String header, String data) {
         ApiRequest response = new ApiRequest(header, data);
         return gson.toJson(response);
     }
 
+    /**
+     * Use this when the "data" portion is already in a JSON format.
+     *
+     * @param header the header label
+     * @param data   the data to include.
+     * @return a JSON formatted string with the header and data filled in.
+     */
     private String wrapIntoJsonObjectDataRaw(String header, String data) {
         return String.format("{\"header\":\"%s\", \"data\": %s}", header, data);
     }
 
+    /**
+     * Attempts to open the home page in the default web browser.
+     */
     private void openWebPage() {
         File home = new File("src\\main\\resources\\website\\ZootTube.html");
         String url = home.getAbsolutePath();
@@ -87,6 +122,12 @@ public class App {
         }
     }
 
+    /**
+     * Gets a {@link Credential} for this to use.
+     *
+     * @param user the name to store the Credential under.
+     * @return a Credential for this app.
+     */
     private Credential getCredential(String user) {
         Credential credential;
         String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
@@ -103,6 +144,9 @@ public class App {
         return credential;
     }
 
+    /**
+     * When the user presses the Enter key a few times this app will shutdown.
+     */
     private void waitToClose() {
         Scanner input = new Scanner(System.in);
         System.out.println("Press enter to close server.");

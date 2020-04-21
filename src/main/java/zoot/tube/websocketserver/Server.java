@@ -1,5 +1,7 @@
 package zoot.tube.websocketserver;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +9,22 @@ import java.util.function.Consumer;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import zoot.tube.ApiRequest;
 
 public class Server extends WebSocketServer {
+
+    public static Consumer<String> createDefaultGreeting(Server server, String greeting) {
+        return message -> {
+            Gson gson = new GsonBuilder().create();
+            ApiRequest request = gson.fromJson(message, ApiRequest.class);
+
+            // Make sure the message is asking for the greeting.
+            if (request.getHeader().equals("getGreeting")) {
+                // Send back the greeting.
+                server.sendMessage(String.format("{\"header\":\"greeting\",\"data\":\"%s\"}", greeting));
+            }
+        };
+    }
 
     private WebSocket conn = null;
     private List<Consumer<String>> messageHandlers = new ArrayList<>();
@@ -37,7 +53,6 @@ public class Server extends WebSocketServer {
         }
         System.out.println(String.format("Connection opened to: %s", conn.getRemoteSocketAddress()));
         this.conn = conn;
-        this.conn.send("{\"header\":\"greeting\",\"data\":\"Hello world!\"}");
     }
 
     @Override
