@@ -49,7 +49,7 @@ public class GoogleAuthJava {
      * @param userId userId or {@code null} if not using a persisted credential store.
      * @return a Credential.
      */
-    private Credential authorizeAndGetNewCredential(String userId) {
+    public Credential authorizeAndGetNewCredential(String userId) {
         Credential credential = this.createEmptyCredential();
         GoogleAuthorizationCodeFlow flow = this.getAuthorizationCodeFlow();
 
@@ -75,7 +75,7 @@ public class GoogleAuthJava {
      * @param redirectUri an authorized redirectUri known by the Google OAuth Client.
      * @return a Credential for the user the code belongs to.
      */
-    private Credential authorizeUsingUserCode(String code, String redirectUri) {
+    public Credential authorizeUsingUserCode(String code, String redirectUri) {
         Credential credential = this.createEmptyCredential();
 
         GoogleTokenResponse tokenResponse;
@@ -109,7 +109,7 @@ public class GoogleAuthJava {
      * @param refreshToken the refresh-token.
      * @return a Credential.
      */
-    private Credential authorizeUsingRefreshToken(String refreshToken) {
+    public Credential authorizeUsingRefreshToken(String refreshToken) {
         Credential credential = this.createEmptyCredential();
         credential.setRefreshToken(refreshToken);
         try {

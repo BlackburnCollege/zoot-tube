@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
-public class SimpleYouTubeAPI {
+public class SimpleYouTubeAPI implements YouTubeAPI {
 
     private static final String APPLICATION_NAME = "Zoot Tube";
     private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();

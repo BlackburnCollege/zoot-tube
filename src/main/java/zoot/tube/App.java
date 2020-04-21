@@ -3,46 +3,94 @@
  */
 package zoot.tube;
 
-import Sockets.SimpleSocket;
+import com.google.api.client.auth.oauth2.Credential;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import zoot.tube.googleapi.GoogleAuthJava;
+import zoot.tube.googleapi.SimpleYouTubeAPI;
+import zoot.tube.googleapi.YouTubeAPI;
+import zoot.tube.websocketserver.Server;
 
 public class App {
+    /**
+     * Ignore this method, it's so the JUnit tests pass. :)
+     * @return Hello world.
+     */
     public String getGreeting() {
         return "Hello world.";
     }
 
-    public static void main(String[] args) throws UnknownHostException {
-        SimpleSocket socket = new SimpleSocket(8080);
-        socket.addMessageHandler((String message) -> {
-            System.out.println(message);
-        });
+    public static void main(String[] args) {
+        new App();
+    }
 
-        File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
-        String url = home.getAbsolutePath();
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            try {
-                Desktop.getDesktop().browse(home.toURI());
-            } catch (IOException e) {
-                System.out.println("Open this file in your web browser: " + url);
-            }
-        }
+    private GoogleAuthJava authenticator;
+    private YouTubeAPI youtubeAPI;
+    private Server server;
 
-//        while (true) {
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+    public App() {
+        // no touchy!!!
+        this.authenticator = new GoogleAuthJava(
+                "src/main/resources/client_secret.json",
+                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl")
+        );
+        Credential credential = authenticator.authorizeAndGetNewCredential(null);
+        youtubeAPI = new SimpleYouTubeAPI(credential);
+        // ============================================
 
+        // can touch all you want!
+        // Get's the user's playlists
+        String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+        System.out.println(myPlaylistsAsJSON);
+        // ============================================
+
+        // no touchy!!!
+        this.server = new Server(8080);
+        this.addMessageHandlers();
+        this.server.start();
+        this.openWebPage();
+        this.waitToClose();
+        // ============================================
+    }
+
+    private void waitToClose() {
         Scanner input = new Scanner(System.in);
         System.out.println("Press enter to close server.");
         input.nextLine();
 
-        socket.shutdown();
+        this.server.shutdown();
+    }
+
+    private void addMessageHandlers() {
+        this.server.addMessageHandler((String message) -> {
+            System.out.println(message);
+            this.server.sendMessage("{\"data\":\"Butt\"}");
+        });
+
+        this.server.addMessageHandler(new Consumer<String>() {
+            @Override
+            public void accept(String message) {
+                System.out.println(message);
+                server.sendMessage("{\"data\":\"Bigger Butt\"}");
+            }
+        });
+    }
+
+    private void openWebPage() {
+//        File home = new File("src\\main\\java\\zoot\\tube\\websocketwebserver\\ZootTube.html");
+        File home = new File("src\\main\\resources\\website\\ZootTube.html");
+        String url = home.getAbsolutePath();
+        System.out.println("\nOpen this file in your web browser if it doesn't open automatically:\n" + url + "\n\n");
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(home.toURI());
+            } catch (IOException e) {
+                System.out.println("Unable to open page");
+            }
+        }
     }
 }

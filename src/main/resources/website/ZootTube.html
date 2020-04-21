@@ -3,18 +3,6 @@
 <head>
     <meta charset="utf-8"/>
     <title>Zoot Tube</title>
-    <script src="https://apis.google.com/js/platform.js?onload=start" async defer></script>
-    <script>
-        function start() {
-            gapi.load('auth2', function () {
-                auth2 = gapi.auth2.init({
-                    client_id: '991685953336-su9qrdbh9egc8une72a09qko04kd69md.apps.googleusercontent.com',
-                    // Scopes to request in addition to 'profile' and 'email'
-                    scope: 'https://www.googleapis.com/auth/youtube.force-ssl'
-                });
-            });
-        }
-    </script>
 </head>
 <body>
 
@@ -23,6 +11,8 @@
 <div id="app">
     <button id="signInButton" onclick="onSignIn()">Sign in</button>
 </div>
+
+<script src="scripts/index.js"></script>
 
 <script>
     let socket = new WebSocket('ws://localhost:8080');
