@@ -90,7 +90,7 @@ public class App {
             Desktop desktop = Desktop.getDesktop();
             if (desktop.isSupported(Desktop.Action.BROWSE)) {
                 try {
-                    desktop.browse(URI.create(url));
+                    desktop.browse(home.toURI());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
