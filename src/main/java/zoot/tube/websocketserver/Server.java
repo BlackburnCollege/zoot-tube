@@ -37,7 +37,7 @@ public class Server extends WebSocketServer {
         }
         System.out.println(String.format("Connection opened to: %s", conn.getRemoteSocketAddress()));
         this.conn = conn;
-        this.conn.send("{\"data\":\"Hello world!\"}");
+        this.conn.send("{\"header\":\"greeting\",\"data\":\"Hello world!\"}");
     }
 
     @Override

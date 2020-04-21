@@ -9,7 +9,12 @@
 <a href="test.html">Test Page</a>
 
 <div id="app">
-    <button id="signInButton" onclick="onSignIn()">Sign in</button>
+    <button id="signInButton" onclick="">Sign in</button>
+</div>
+
+<button id="getPlaylists" onclick="getMyPlaylists()">Get My Playlists</button>
+<div id="playlists">
+
 </div>
 
 <script src="scripts/index.js"></script>
@@ -17,31 +22,29 @@
 <script>
     let socket = new WebSocket('ws://localhost:8080');
     socket.onmessage = (messageWrapper) => {
-        const stringMessage = messageWrapper.data;
-        const asJSONObject = JSON.parse(stringMessage);
-        let app = document.getElementById('app');
-        let header = document.createElement('h1');
-        header.innerText = asJSONObject.data;
-        app.appendChild(header);
+        let stringMessage = messageWrapper.data;
+        let asJSONObject = JSON.parse(stringMessage);
+        console.log(asJSONObject);
+
+        if (asJSONObject.header.localeCompare("playlists") === 0) {
+            let workspace = document.getElementById('playlists');
+            let list = document.createElement('ul');
+            asJSONObject.data.forEach((playlist) => {
+                let item = document.createElement('li');
+                item.innerText = playlist.snippet.title;
+                list.appendChild(item);
+            });
+            workspace.appendChild(list);
+        }
     };
     socket.onopen = () => {
-        socket.send("Test!")
+        socket.send(`{"header": "test", "data":"test!"}`);
     };
 
-    function onSignIn() {
-        auth2.grantOfflineAccess().then(signInCallback).catch((err) => {
-            console.log(err);
-        });
+    function getMyPlaylists() {
+        socket.send(`{"header":"getMyPlaylists","data":""}`);
     }
-    function signInCallback(authResult) {
-        if (authResult['code']) {
-            let button = document.getElementById("signInButton");
-            button.setAttribute("style", "display: none");
-            socket.send(`{"code":"${authResult['code']}"`);
-        } else {
-            console.log("ERROR")
-        }
-    }
+
 </script>
 </body>
 </html>

@@ -4,10 +4,11 @@
 package zoot.tube;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -20,6 +21,7 @@ import zoot.tube.websocketserver.Server;
 public class App {
     /**
      * Ignore this method, it's so the JUnit tests pass. :)
+     *
      * @return Hello world.
      */
     public String getGreeting() {
@@ -33,6 +35,7 @@ public class App {
     private GoogleAuthJava authenticator;
     private YouTubeAPI youtubeAPI;
     private Server server;
+    private Gson gson = new GsonBuilder().create();
 
     public App() {
         // no touchy!!!
@@ -43,8 +46,8 @@ public class App {
 
         // can touch all you want!
         // Get's the user's playlists
-        String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
-        System.out.println(myPlaylistsAsJSON);
+//        String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+//        System.out.println(myPlaylistsAsJSON);
         // ============================================
 
         // no touchy!!!
@@ -81,18 +84,24 @@ public class App {
     }
 
     private void addMessageHandlers() {
-        this.server.addMessageHandler((String message) -> {
-            System.out.println(message);
-            this.server.sendMessage("{\"data\":\"Butt\"}");
-        });
-
-        this.server.addMessageHandler(new Consumer<String>() {
-            @Override
-            public void accept(String message) {
-                System.out.println(message);
-                server.sendMessage("{\"data\":\"Bigger Butt\"}");
+        this.server.addMessageHandler((message) -> {
+            ApiRequest request = this.gson.fromJson(message, ApiRequest.class);
+            if (request.getHeader().equals("getMyPlaylists")) {
+                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
+                System.out.println("Sending playlists");
+                this.server.sendMessage(response);
             }
         });
+    }
+
+    private String wrapIntoJsonObject(String header, String data) {
+        ApiRequest response = new ApiRequest(header, data);
+        return gson.toJson(response);
+    }
+
+    private String wrapIntoJsonObjectDataRaw(String header, String data) {
+        return String.format("{\"header\":\"%s\", \"data\": %s}", header, data);
     }
 
     private void openWebPage() {
