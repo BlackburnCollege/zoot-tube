@@ -7,6 +7,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -85,11 +86,14 @@ public class App {
         File home = new File("src\\main\\resources\\website\\ZootTube.html");
         String url = home.getAbsolutePath();
         System.out.println("\nOpen this file in your web browser if it doesn't open automatically:\n" + url + "\n\n");
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            try {
-                Desktop.getDesktop().browse(home.toURI());
-            } catch (IOException e) {
-                System.out.println("Unable to open page");
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(URI.create(url));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
