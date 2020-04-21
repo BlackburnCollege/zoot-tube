@@ -10,6 +10,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 
+/**
+ * Handles YouTube API calls.
+ */
 public class SimpleYouTubeAPI implements YouTubeAPI {
 
     private static final String APPLICATION_NAME = "Zoot Tube";
@@ -19,10 +22,20 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
     private Credential credential;
     private Gson gson = new GsonBuilder().create();
 
+    /**
+     * Creates a YouTube client handler with the given credential.
+     *
+     * @param credential the credential to user.
+     */
     public SimpleYouTubeAPI(Credential credential) {
         this.credential = credential;
     }
 
+    /**
+     * Creates an active YouTube client to use.
+     *
+     * @return a YouTube client.
+     */
     private YouTube getService() {
         return new YouTube.Builder(
                 GoogleUtil.getTrustedTransport(),

@@ -14,6 +14,10 @@ import zoot.tube.googleapi.SimpleYouTubeAPI;
 import zoot.tube.googleapi.YouTubeAPI;
 import zoot.tube.websocketserver.Server;
 
+/**
+ * Handles the creation of a web socket server and a YouTube client,
+ * and the communications between.
+ */
 public class App {
 
     /**
@@ -34,6 +38,9 @@ public class App {
     private Server server;
     private Gson gson = new GsonBuilder().create();
 
+    /**
+     * Starts the app.
+     */
     public App() {
         // Get the user's Credential.
         String user = "user";

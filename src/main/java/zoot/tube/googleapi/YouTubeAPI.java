@@ -1,5 +1,8 @@
 package zoot.tube.googleapi;
 
+/**
+ * The required functionality for use in the app when interacting with a YouTubeAPI.
+ */
 public interface YouTubeAPI {
 
     /**

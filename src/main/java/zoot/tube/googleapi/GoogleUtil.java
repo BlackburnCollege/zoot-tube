@@ -9,6 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+/**
+ * Shared Google utilities for this package.
+ */
 public class GoogleUtil {
 
     private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
