@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import zoot.tube.googleapi.GoogleAuthJava;
+import zoot.tube.googleapi.RefreshTokenSaver;
 import zoot.tube.googleapi.SimpleYouTubeAPI;
 import zoot.tube.googleapi.YouTubeAPI;
 import zoot.tube.websocketserver.Server;
@@ -35,11 +36,8 @@ public class App {
 
     public App() {
         // no touchy!!!
-        this.authenticator = new GoogleAuthJava(
-                "src/main/resources/client_secret.json",
-                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl")
-        );
-        Credential credential = authenticator.authorizeAndGetNewCredential(null);
+        String user = "user";
+        Credential credential = this.getCredential(user);
         youtubeAPI = new SimpleYouTubeAPI(credential);
         // ============================================
 
@@ -56,6 +54,22 @@ public class App {
         this.openWebPage();
         this.waitToClose();
         // ============================================
+    }
+
+    private Credential getCredential(String user) {
+        Credential credential;
+        String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
+        this.authenticator = new GoogleAuthJava(
+                "src/main/resources/client_secret.json",
+                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl")
+        );
+        if (refreshToken.length() > 0) {
+            credential = authenticator.authorizeUsingRefreshToken(refreshToken);
+        } else {
+            credential = authenticator.authorizeAndGetNewCredential(null);
+            RefreshTokenSaver.saveRefreshToken(user, credential.getRefreshToken());
+        }
+        return credential;
     }
 
     private void waitToClose() {
