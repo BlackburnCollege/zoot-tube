@@ -19,7 +19,6 @@ public class GoogleAuthJava {
 
     private final Collection<String> scopes;
     private final JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    private final GoogleUtil googleUtil = new GoogleUtil();
     private final GoogleClientSecrets clientSecrets;
 
     /**
@@ -50,9 +49,13 @@ public class GoogleAuthJava {
      * @return a Credential.
      */
     public Credential authorizeAndGetNewCredential(String userId) {
+        // Create an empty Credential.
         Credential credential = this.createEmptyCredential();
+        // Get an authorization code flow.
         GoogleAuthorizationCodeFlow flow = this.getAuthorizationCodeFlow();
 
+        // Attempt to have user authorize this app.
+        // Attempts to open a Google authorization page in the default web browser.
         try {
             credential = new AuthorizationCodeInstalledApp(
                     flow,
@@ -110,13 +113,19 @@ public class GoogleAuthJava {
      * @return a Credential.
      */
     public Credential authorizeUsingRefreshToken(String refreshToken) {
+        // Create an empty Credential.
         Credential credential = this.createEmptyCredential();
+
+        // Set the refresh token.
         credential.setRefreshToken(refreshToken);
+
+        // Attempt to get a full Credential from the refresh token.
         try {
             credential.refreshToken();
         } catch (IOException e) {
             System.err.println("GoogleAuthJava: Failed to authorize using refresh-token.");
         }
+
         return credential;
     }
 

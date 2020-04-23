@@ -12,7 +12,7 @@ import com.google.api.client.json.JsonFactory;
  * The above mentioned Credential class has been deprecated. But the functionality
  * is still correct for the Builder.
  * <p>
- * Primary use is to be able to create a new credential using a refresh-token
+ * Primary use is to be able to create a blank {@link Credential}.
  */
 public class Builder extends Credential.Builder {
 
