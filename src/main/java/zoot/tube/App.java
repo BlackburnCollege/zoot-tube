@@ -87,6 +87,24 @@ public class App {
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
+            
+            if (request.getHeader().equals("signOut")){
+                // Get the playlists.
+                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+                // Package up the playlists into a response.
+                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
+                System.out.println("Sending playlists");
+                this.server.sendMessage(response);
+            }
+            if (request.getHeader().equals("signIn")){
+                // Get the playlists.
+                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+                // Package up the playlists into a response.
+                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
+                System.out.println("Sending playlists");
+                this.server.sendMessage(response);
+            }
+            
         });
     }
 

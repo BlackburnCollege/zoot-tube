@@ -59,3 +59,12 @@ function getMyPlaylists() {
     // Send the web socket this json formatted message.
     socket.send(`{"header": "getMyPlaylists", "data": ""}`);
 }
+
+//function to sign out of your account
+function signOut(){
+    socket.send(`{"header": "signOut", "data": ""}`);
+}
+
+function signIn(){
+    socket.send(`{"header": "signIn", "data": ""}`);
+}
