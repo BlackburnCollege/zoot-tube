@@ -1,6 +1,7 @@
 package zoot.tube;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.oauth2.Oauth2;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.awt.Desktop;
@@ -8,10 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
-import zoot.tube.googleapi.GoogleAuthJava;
-import zoot.tube.googleapi.RefreshTokenSaver;
-import zoot.tube.googleapi.SimpleYouTubeAPI;
-import zoot.tube.googleapi.YouTubeAPI;
+import zoot.tube.googleapi.*;
 import zoot.tube.websocketserver.Server;
 
 /**
@@ -42,12 +40,17 @@ public class App {
      * Starts the app.
      */
     public App() {
+        // This will need to be moved to login functionality.
         // Get the user's Credential.
         String user = "user";
         Credential credential = this.getCredential(user);
 
         // Create the YouTubeAPI
         youtubeAPI = new SimpleYouTubeAPI(credential);
+        String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
+        System.out.println(usersEmail);
+        // youtubeAPI.setCredential(credential); // setting a Credential.
+        // =================
 
         // Create the web socket server.
         this.server = new Server(8080);
@@ -140,7 +143,7 @@ public class App {
         String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
         this.authenticator = new GoogleAuthJava(
                 "src/main/resources/client_secret.json",
-                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl")
+                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
         );
         if (refreshToken.length() > 0) {
             credential = authenticator.authorizeUsingRefreshToken(refreshToken);

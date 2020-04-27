@@ -1,5 +1,7 @@
 package zoot.tube.googleapi;
 
+import com.google.api.client.auth.oauth2.Credential;
+
 /**
  * The required functionality for use in the app when interacting with a YouTubeAPI.
  */
@@ -21,4 +23,6 @@ public interface YouTubeAPI {
      * @return the resulting playlist.
      */
     String updatePlaylistVisibility(String playlist, PrivacyStatus privacyStatus);
+
+    void setCredential(Credential credential);
 }

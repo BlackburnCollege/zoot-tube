@@ -31,6 +31,14 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
         this.credential = credential;
     }
 
+    public SimpleYouTubeAPI() {
+
+    }
+
+    public void setCredential(Credential credential) {
+        this.credential = credential;
+    }
+
     /**
      * Creates an active YouTube client to use.
      *
