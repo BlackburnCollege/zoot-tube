@@ -87,7 +87,7 @@ public class App {
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
-            
+            System.out.println("Hello there!");
             if (request.getHeader().equals("signOut")){
                 // Get the playlists.
                 String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
