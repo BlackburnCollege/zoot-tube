@@ -2,6 +2,7 @@ console.log("How did I get here........?")
 
 // Create the web socket
 let socket = new WebSocket('ws://localhost:8080');
+let signInButton = document.getElementById("signInButton");
 
 // This is where you handle messages coming in through the web socket.
 socket.onmessage = (messageWrapper) => {
@@ -36,7 +37,7 @@ socket.onmessage = (messageWrapper) => {
     if (asJSONObject.header.localeCompare("email") === 0) {
         // Get the playlists div element.
         let workspace = document.getElementById('email');
-        
+
         let header = document.createElement('h3');
         header.innerText = asJSONObject.data;
         // Add the header to the app div.
@@ -73,8 +74,52 @@ function getMyPlaylists() {
 //function to sign out of your account
 function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
+    showSignIn();
+    hideSignOut();
+
+
 }
 
 function signIn() {
     socket.send(`{"header": "signIn", "data": ""}`);
+    showSignOut();
+    hideSignIn();
+
+
+}
+
+function hideSignIn() {
+    var signInButton = document.getElementById("signInButton");
+    if (signInButton.style.display === "none") {
+        signInButton.style.display = "block";
+    } else { 
+        signInButton.style.display = "none";
+    }
+}
+
+function hideSignOut() {
+    var signOutButton = document.getElementById("signOutButton");
+    if (signOutButton.style.display === "none") {
+        signOutButton.style.display = "block";
+    } else { 
+        signOutButton.style.display = "none";
+    }
+}
+
+function showSignIn() {
+    var signInButton = document.getElementById("signInButton");
+    if (signInButton.style.display === "block") {
+        signInButton.style.display = "none";
+    } else { 
+        signInButton.style.display = "block";
+    }
+}
+
+function showSignOut() {
+    var signOutButton = document.getElementById("signOutButton");
+    if (signOutButton.style.display === "block") {
+        signOutButton.style.display = "none";
+    } else { 
+        signOutButton.style.display = "block";
+    }
 }

@@ -35,6 +35,7 @@ public class App {
     private YouTubeAPI youtubeAPI;
     private Server server;
     private Gson gson = new GsonBuilder().create();
+    
 
     /**
      * Starts the app.
@@ -42,10 +43,15 @@ public class App {
     public App() {
         // This will need to be moved to login functionality.
         // Get the user's Credential.
-
+        this.authenticator = new GoogleAuthJava(
+                "src/main/resources/client_secret.json",
+                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
+        );
+        youtubeAPI = new SimpleYouTubeAPI();
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
         // Create the web socket server.
+        
         this.server = new Server(8080);
         // Add message handlers to the server.
         this.addMessageHandlers();
@@ -80,23 +86,17 @@ public class App {
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
-            System.out.println("Hello there!");
-            if (request.getHeader().equals("signOut")) {
-                // Get the playlists.
-                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
-                System.out.println("Sending playlists");
-                this.server.sendMessage(response);
-            }
+
 
             if (request.getHeader().equals("signIn")) {
 
                 String user = "user";
-                Credential credential = this.getCredential(user);
+               // Credential credential = this.getCredential(user);
+               Credential credential = authenticator.authorizeAndGetNewCredential(null);
+                youtubeAPI.setCredential(credential);
 
                 // Create the YouTubeAPI
-                youtubeAPI = new SimpleYouTubeAPI(credential);
+                
                 String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
                 System.out.println(usersEmail);
 
@@ -104,7 +104,10 @@ public class App {
                 //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
                 this.server.sendMessage(jSONEmail);
             }
-
+            
+            if (request.getHeader().equals("signOut")) {
+                youtubeAPI.setCredential(null);
+            }
         });
     }
 
