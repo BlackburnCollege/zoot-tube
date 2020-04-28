@@ -33,6 +33,16 @@ socket.onmessage = (messageWrapper) => {
         workspace.appendChild(list);
     }
 
+    if (asJSONObject.header.localeCompare("email") === 0) {
+        // Get the playlists div element.
+        let workspace = document.getElementById('email');
+        
+        let header = document.createElement('h3');
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+
+    }
     // Check if the header is for a greeting.
     if (asJSONObject.header.localeCompare('greeting') === 0) {
         // Get the app div element.
@@ -61,10 +71,10 @@ function getMyPlaylists() {
 }
 
 //function to sign out of your account
-function signOut(){
+function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
 }
 
-function signIn(){
+function signIn() {
     socket.send(`{"header": "signIn", "data": ""}`);
 }

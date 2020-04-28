@@ -13,8 +13,8 @@ import zoot.tube.googleapi.*;
 import zoot.tube.websocketserver.Server;
 
 /**
- * Handles the creation of a web socket server and a YouTube client,
- * and the communications between.
+ * Handles the creation of a web socket server and a YouTube client, and the
+ * communications between.
  */
 public class App {
 
@@ -42,16 +42,9 @@ public class App {
     public App() {
         // This will need to be moved to login functionality.
         // Get the user's Credential.
-        String user = "user";
-        Credential credential = this.getCredential(user);
 
-        // Create the YouTubeAPI
-        youtubeAPI = new SimpleYouTubeAPI(credential);
-        String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
-        System.out.println(usersEmail);
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
-
         // Create the web socket server.
         this.server = new Server(8080);
         // Add message handlers to the server.
@@ -71,7 +64,7 @@ public class App {
      */
     private void addMessageHandlers() {
         // Add a greeting handler.
-        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Butts"));
+        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Hello "));
 
         // Add a handler for requesting the user's playlists.
         this.server.addMessageHandler((message) -> {
@@ -88,7 +81,7 @@ public class App {
                 this.server.sendMessage(response);
             }
             System.out.println("Hello there!");
-            if (request.getHeader().equals("signOut")){
+            if (request.getHeader().equals("signOut")) {
                 // Get the playlists.
                 String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
                 // Package up the playlists into a response.
@@ -96,15 +89,22 @@ public class App {
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
-            if (request.getHeader().equals("signIn")){
-                // Get the playlists.
-                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
-                System.out.println("Sending playlists");
-                this.server.sendMessage(response);
+
+            if (request.getHeader().equals("signIn")) {
+
+                String user = "user";
+                Credential credential = this.getCredential(user);
+
+                // Create the YouTubeAPI
+                youtubeAPI = new SimpleYouTubeAPI(credential);
+                String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
+                System.out.println(usersEmail);
+
+                String jSONEmail = this.wrapIntoJsonObject("email", usersEmail);
+                //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
+                this.server.sendMessage(jSONEmail);
             }
-            
+
         });
     }
 
@@ -112,7 +112,7 @@ public class App {
      * Use this to wrap the "data" into a String.
      *
      * @param header the header label
-     * @param data   the data to include.
+     * @param data the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObject(String header, String data) {
@@ -124,7 +124,7 @@ public class App {
      * Use this when the "data" portion is already in a JSON format.
      *
      * @param header the header label
-     * @param data   the data to include.
+     * @param data the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObjectDataRaw(String header, String data) {
