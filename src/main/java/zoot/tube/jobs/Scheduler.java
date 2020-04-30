@@ -5,10 +5,29 @@
  */
 package zoot.tube.jobs;
 
+import static java.time.ZonedDateTime.now;
+import java.util.Date;
+
+
 /**
  *
  * @author student
  */
 public class Scheduler {
+    Date desiredDate;
+    long delay;
+    public Scheduler(Date date){
+        desiredDate = date;
+        Date now = new Date();
+        delay = desiredDate.getTime() - now.getTime();
+    }
+    
+    public long getDelay(){
+        return this.delay;
+    }
+    
+    public void execute(){
+        
+    }
     
 }
