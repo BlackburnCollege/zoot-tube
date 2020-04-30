@@ -1,9 +1,12 @@
 package zoot.tube.googleapi;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -56,5 +59,16 @@ public class GoogleUtil {
             e.printStackTrace();
         }
         return clientSecrets;
+    }
+
+    public static Userinfoplus getUserInfo(Credential credential) {
+        Oauth2 oauth2 = new Oauth2.Builder(GoogleUtil.getTrustedTransport(), JSON_FACTORY, credential).setApplicationName("Oauth2").build();
+        Userinfoplus userinfoplus = null;
+        try {
+            userinfoplus = oauth2.userinfo().get().execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return userinfoplus;
     }
 }
