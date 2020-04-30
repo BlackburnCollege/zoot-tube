@@ -5,7 +5,9 @@
  */
 package zoot.tube.jobs;
 
+import zoot.tube.googleapi.*;
 import static java.time.ZonedDateTime.now;
+import java.util.Collection;
 import java.util.Date;
 
 
@@ -16,8 +18,14 @@ import java.util.Date;
 public class Scheduler {
     Date desiredDate;
     long delay;
-    public Scheduler(Date date){
+    String user;
+    String clientSecretsUrl;
+    Collection<String> scopes;
+    PrivacyStatus newPrivacy;
+    public Scheduler(Date date, String user, String clientSecretsUrl, Collection<String> scopes, PrivacyStatus newPrivacy){
         desiredDate = date;
+        this.user = user;
+        this.newPrivacy = newPrivacy;
         Date now = new Date();
         delay = desiredDate.getTime() - now.getTime();
     }
@@ -27,7 +35,10 @@ public class Scheduler {
     }
     
     public void execute(){
-        
+        GoogleAuthJava googleAuthJava = new GoogleAuthJava(clientSecretsUrl, scopes);   
+        SimpleYouTubeAPI simpleYouTubeAPI = new SimpleYouTubeAPI(googleAuthJava.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(user)));
+        String playlist = simpleYouTubeAPI.getMyPlaylists();
+        simpleYouTubeAPI.updatePlaylistVisibility(playlist, newPrivacy);
     }
     
 }
