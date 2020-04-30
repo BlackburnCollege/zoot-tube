@@ -5,6 +5,7 @@
  */
 package zoot.tube.jobs;
 
+import com.google.gson.Gson;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,11 +23,14 @@ import java.util.logging.Logger;
 public class SchedulerExecutor {
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     Scheduler scheduler;
+    private final String taskAsString;
 
     public SchedulerExecutor(Scheduler scheduler) 
     {
         this.scheduler = scheduler;
-
+        Gson gson = new Gson();
+        this.taskAsString = gson.toJson(this.scheduler);
+        this.scheduler.storeTask(taskAsString);
     }
 
     public void startExecution()
