@@ -89,20 +89,31 @@ public class App {
 
 
             if (request.getHeader().equals("signIn")) {
+                
 
                 String user = "user";
+                //testing this because user tokens don't exist, so reading from
+                //them DNE
+                String test = "juniorzoottube@gmail.com";
+                if(RefreshTokenSaver.loadRefreshToken(test).length() > 0){
+                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(test));
+                }else {
                // Credential credential = this.getCredential(user);
                Credential credential = authenticator.authorizeAndGetNewCredential(null);
                 youtubeAPI.setCredential(credential);
+                
 
                 // Create the YouTubeAPI
                 
                 String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
                 System.out.println(usersEmail);
+                RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
+
 
                 String jSONEmail = this.wrapIntoJsonObject("email", usersEmail);
                 //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
                 this.server.sendMessage(jSONEmail);
+            }
             }
             
             if (request.getHeader().equals("signOut")) {
