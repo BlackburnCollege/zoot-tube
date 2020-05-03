@@ -1,15 +1,18 @@
 package zoot.tube;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.youtube.model.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 import zoot.tube.googleapi.*;
+import zoot.tube.schedule.TaskScheduler;
 import zoot.tube.websocketserver.Server;
 
 /**
@@ -17,6 +20,8 @@ import zoot.tube.websocketserver.Server;
  * and the communications between.
  */
 public class App {
+
+
 
     /**
      * Ignore this method, it's so the JUnit tests pass. :)
@@ -31,6 +36,8 @@ public class App {
         new App();
     }
 
+    private static final String CLIENT_SECRETS_URL = "src/main/resources/client_secret.json";
+    private static final Collection<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email");
     private GoogleAuthJava authenticator;
     private YouTubeAPI youtubeAPI;
     private Server server;
@@ -51,6 +58,8 @@ public class App {
         System.out.println(usersEmail);
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
+
+        TaskScheduler scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
 
         // Create the web socket server.
         this.server = new Server(8080);
@@ -81,30 +90,12 @@ public class App {
             // Make sure the message is asking for the user's playlists.
             if (request.getHeader().equals("getMyPlaylists")) {
                 // Get the playlists.
-                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
+                List<Playlist> myPlaylists = youtubeAPI.getMyPlaylists();
                 // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
+                String response = this.wrapIntoJsonObjectDataRaw("playlists", wrapIntoJsonObject("myPlaylists", gson.toJson(myPlaylists)));
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
-            System.out.println("Hello there!");
-            if (request.getHeader().equals("signOut")){
-                // Get the playlists.
-                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
-                System.out.println("Sending playlists");
-                this.server.sendMessage(response);
-            }
-            if (request.getHeader().equals("signIn")){
-                // Get the playlists.
-                String myPlaylistsAsJSON = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", myPlaylistsAsJSON);
-                System.out.println("Sending playlists");
-                this.server.sendMessage(response);
-            }
-            
         });
     }
 

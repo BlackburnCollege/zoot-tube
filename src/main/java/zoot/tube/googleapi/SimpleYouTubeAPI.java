@@ -4,8 +4,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +17,6 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
     private static final JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     private Credential credential;
-    private Gson gson = new GsonBuilder().create();
 
     /**
      * Creates a YouTube client handler with the given credential.
@@ -148,10 +145,10 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
      * {@inheritDoc}
      */
     @Override
-    public PlaylistItem updatePlaylistItemVisibility(PlaylistItem playlistItem, PrivacyStatus privacyStatus) {
+    public PlaylistItem updatePlaylistItemVisibility(PlaylistItem playlistItem, String privacyStatus) {
         YouTube youtube = this.getService();
 
-        String status = privacyStatus.toString().toLowerCase();
+        String status = privacyStatus.toLowerCase();
         playlistItem.setStatus(new PlaylistItemStatus().setPrivacyStatus(status));
 
         PlaylistItem response;
@@ -194,10 +191,10 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
      * {@inheritDoc}
      */
     @Override
-    public Video updateVideoVisibility(Video video, PrivacyStatus privacyStatus) {
+    public Video updateVideoVisibility(Video video, String privacyStatus) {
         YouTube youtube = this.getService();
 
-        String status = privacyStatus.toString().toLowerCase();
+        String status = privacyStatus.toLowerCase();
         video.setStatus(new VideoStatus().setPrivacyStatus(status));
 
         Video response;

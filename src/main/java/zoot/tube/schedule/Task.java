@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class Task {
 
+    private String id;
     private String user;
     private String taskType;
     private Date start;
@@ -16,6 +17,7 @@ public class Task {
         this.start = start;
         this.expire = expire;
         this.relevantID = relevantID;
+        this.id = TaskIO.getNewTaskID();
     }
 
     public String getUser() {
@@ -36,5 +38,9 @@ public class Task {
 
     public String getRelevantID() {
         return relevantID;
+    }
+
+    public String getID() {
+        return id;
     }
 }
