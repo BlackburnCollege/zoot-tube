@@ -16,8 +16,8 @@ import zoot.tube.schedule.TaskScheduler;
 import zoot.tube.websocketserver.Server;
 
 /**
- * Handles the creation of a web socket server and a YouTube client,
- * and the communications between.
+ * Handles the creation of a web socket server and a YouTube client, and the
+ * communications between.
  */
 public class App {
 
@@ -42,6 +42,7 @@ public class App {
     private YouTubeAPI youtubeAPI;
     private Server server;
     private Gson gson = new GsonBuilder().create();
+    
 
     /**
      * Starts the app.
@@ -49,19 +50,18 @@ public class App {
     public App() {
         // This will need to be moved to login functionality.
         // Get the user's Credential.
-        String user = "user";
-        Credential credential = this.getCredential(user);
-
-        // Create the YouTubeAPI
-        youtubeAPI = new SimpleYouTubeAPI(credential);
-        String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
-        System.out.println(usersEmail);
+        this.authenticator = new GoogleAuthJava(
+                "src/main/resources/client_secret.json",
+                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
+        );
+        youtubeAPI = new SimpleYouTubeAPI();
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
 
         TaskScheduler scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
 
         // Create the web socket server.
+        
         this.server = new Server(8080);
         // Add message handlers to the server.
         this.addMessageHandlers();
@@ -80,7 +80,7 @@ public class App {
      */
     private void addMessageHandlers() {
         // Add a greeting handler.
-        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Butts"));
+        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Hello "));
 
         // Add a handler for requesting the user's playlists.
         this.server.addMessageHandler((message) -> {
@@ -92,10 +92,41 @@ public class App {
                 // Get the playlists.
                 List<Playlist> myPlaylists = youtubeAPI.getMyPlaylists();
                 // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", wrapIntoJsonObject("myPlaylists", gson.toJson(myPlaylists)));
+                String response = this.wrapIntoJsonObjectDataRaw("playlists", gson.toJson(myPlaylists));
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
             }
+
+            if (request.getHeader().equals("signIn")) {
+                String user = "user";
+                //testing this because user tokens don't exist, so reading from
+                //them DNE
+                String test = "juniorzoottube@gmail.com";
+                if(RefreshTokenSaver.loadRefreshToken(test).length() > 0){
+                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(test));
+                }else {
+               // Credential credential = this.getCredential(user);
+               Credential credential = authenticator.authorizeAndGetNewCredential(null);
+                youtubeAPI.setCredential(credential);
+                
+
+                // Create the YouTubeAPI
+                
+                String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
+                System.out.println(usersEmail);
+                RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
+
+
+                String jSONEmail = this.wrapIntoJsonObject("email", usersEmail);
+                //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
+                this.server.sendMessage(jSONEmail);
+              }
+            }
+            
+            if (request.getHeader().equals("signOut")) {
+                youtubeAPI.setCredential(null);
+            }
+
         });
     }
 
@@ -103,7 +134,7 @@ public class App {
      * Use this to wrap the "data" into a String.
      *
      * @param header the header label
-     * @param data   the data to include.
+     * @param data the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObject(String header, String data) {
@@ -115,7 +146,7 @@ public class App {
      * Use this when the "data" portion is already in a JSON format.
      *
      * @param header the header label
-     * @param data   the data to include.
+     * @param data the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObjectDataRaw(String header, String data) {
