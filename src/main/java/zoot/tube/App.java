@@ -1,16 +1,14 @@
 package zoot.tube;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import zoot.tube.googleapi.*;
 import zoot.tube.schedule.TaskScheduler;
 import zoot.tube.websocketserver.Server;
@@ -20,7 +18,6 @@ import zoot.tube.websocketserver.Server;
  * communications between.
  */
 public class App {
-
 
 
     /**
@@ -40,9 +37,10 @@ public class App {
     private static final Collection<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email");
     private GoogleAuthJava authenticator;
     private YouTubeAPI youtubeAPI;
+    private TaskScheduler scheduler;
     private Server server;
     private Gson gson = new GsonBuilder().create();
-    
+    private String currentUser;
 
     /**
      * Starts the app.
@@ -55,13 +53,12 @@ public class App {
                 Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
         );
         youtubeAPI = new SimpleYouTubeAPI();
-        // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
 
-        TaskScheduler scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
+        this.scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
 
         // Create the web socket server.
-        
+
         this.server = new Server(8080);
         // Add message handlers to the server.
         this.addMessageHandlers();
@@ -80,7 +77,7 @@ public class App {
      */
     private void addMessageHandlers() {
         // Add a greeting handler.
-        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Hello "));
+        this.server.addMessageHandler(Server.createDefaultGreeting(this.server, "Hello"));
 
         // Add a handler for requesting the user's playlists.
         this.server.addMessageHandler((message) -> {
@@ -89,44 +86,38 @@ public class App {
 
             // Make sure the message is asking for the user's playlists.
             if (request.getHeader().equals("getMyPlaylists")) {
-                // Get the playlists.
                 List<Playlist> myPlaylists = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
                 String response = this.wrapIntoJsonObjectDataRaw("playlists", gson.toJson(myPlaylists));
                 System.out.println("Sending playlists");
                 this.server.sendMessage(response);
+
+                Playlist playlist = myPlaylists.get(2);
+                Date now = new Date();
+                System.out.println(playlist.getSnippet().getTitle());
+                System.out.println(playlist.getId());
+                scheduler.scheduleMakeVideosInPlaylistPrivate(
+                        this.currentUser,
+                        new Date(now.getTime() + (1 * 30000)),
+                        new Date(now.getTime() + (2 * 30000)),
+                        playlist.getId()
+                );
             }
 
             if (request.getHeader().equals("signIn")) {
-                String user = "user";
-                //testing this because user tokens don't exist, so reading from
-                //them DNE
-                String test = "juniorzoottube@gmail.com";
-                if(RefreshTokenSaver.loadRefreshToken(test).length() > 0){
-                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(test));
-                }else {
-               // Credential credential = this.getCredential(user);
-               Credential credential = authenticator.authorizeAndGetNewCredential(null);
-                youtubeAPI.setCredential(credential);
-                
+                Credential credential = this.authenticator.authorizeAndGetNewCredential(null);
+                Userinfoplus userinfo = GoogleUtil.getUserInfo(credential);
+                RefreshTokenSaver.saveRefreshToken(userinfo.getEmail(), credential.getRefreshToken());
+                this.youtubeAPI.setCredential(credential);
+                this.currentUser = userinfo.getEmail();
 
-                // Create the YouTubeAPI
-                
-                String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
-                System.out.println(usersEmail);
-                RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
-
-
-                String jSONEmail = this.wrapIntoJsonObject("email", usersEmail);
-                //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
+                String jSONEmail = this.wrapIntoJsonObject("email", userinfo.getEmail());
                 this.server.sendMessage(jSONEmail);
-              }
             }
-            
+
             if (request.getHeader().equals("signOut")) {
                 youtubeAPI.setCredential(null);
+                this.currentUser = null;
             }
-
         });
     }
 
@@ -134,7 +125,7 @@ public class App {
      * Use this to wrap the "data" into a String.
      *
      * @param header the header label
-     * @param data the data to include.
+     * @param data   the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObject(String header, String data) {
@@ -146,7 +137,7 @@ public class App {
      * Use this when the "data" portion is already in a JSON format.
      *
      * @param header the header label
-     * @param data the data to include.
+     * @param data   the data to include.
      * @return a JSON formatted string with the header and data filled in.
      */
     private String wrapIntoJsonObjectDataRaw(String header, String data) {
@@ -170,28 +161,6 @@ public class App {
                 }
             }
         }
-    }
-
-    /**
-     * Gets a {@link Credential} for this to use.
-     *
-     * @param user the name to store the Credential under.
-     * @return a Credential for this app.
-     */
-    private Credential getCredential(String user) {
-        Credential credential;
-        String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
-        this.authenticator = new GoogleAuthJava(
-                "src/main/resources/client_secret.json",
-                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
-        );
-        if (refreshToken.length() > 0) {
-            credential = authenticator.authorizeUsingRefreshToken(refreshToken);
-        } else {
-            credential = authenticator.authorizeAndGetNewCredential(null);
-            RefreshTokenSaver.saveRefreshToken(user, credential.getRefreshToken());
-        }
-        return credential;
     }
 
     /**

@@ -110,6 +110,7 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
             response = request.execute();
         } catch (IOException e) {
             System.err.println("Failed to retrieve user's playlists.");
+            e.printStackTrace();
             return new Playlist();
         }
 
@@ -129,12 +130,13 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
         try {
             request = youTube.playlistItems()
                     .list("snippet,contentDetails,status")
-                    .setMaxResults(99L)
+//                    .setMaxResults(99L)
                     .setPlaylistId(playlist.getId())
             ;
             response = request.execute();
         } catch (IOException e) {
             System.err.println("Failed to retrieve playlistItems.");
+            e.printStackTrace();
             return new ArrayList<>();
         }
 
@@ -179,7 +181,7 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
             ;
             response = request.execute();
         } catch (IOException e) {
-            System.err.println("Failed to retrieve user's playlists.");
+            System.err.println("Failed to retrieve video.");
             return new Video();
         }
 
@@ -194,15 +196,15 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
     public Video updateVideoVisibility(Video video, String privacyStatus) {
         YouTube youtube = this.getService();
 
-        String status = privacyStatus.toLowerCase();
-        video.setStatus(new VideoStatus().setPrivacyStatus(status));
+        video.setStatus(new VideoStatus().setPrivacyStatus(privacyStatus));
 
         Video response;
         try {
-            YouTube.Videos.Update request = youtube.videos().update("snippet,status", video);
+            YouTube.Videos.Update request = youtube.videos().update("snippet,contentDetails,status", video);
             response = request.execute();
         } catch (IOException e) {
-            System.err.println(String.format("Failed to update playlist privacy for playlist id: %s", video.getId()));
+            System.err.println(String.format("Failed to update video privacy for video id: %s", video.getId()));
+            e.printStackTrace();
             return video;
         }
 

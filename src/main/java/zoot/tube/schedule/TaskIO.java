@@ -69,12 +69,9 @@ public class TaskIO {
      * @param content the content to save. MUST be a JSON String.
      */
     public static void saveContentUnderTask(Task task, String content) {
-        Gson gson = new GsonBuilder().create();
-        String contentAsJson = gson.toJson(content);
-
         FileIO.saveToFile(
                 String.format("%s%s%s", TaskIO.RESOURCES_TASK_RESOURCES, "/", task.getID()),
-                contentAsJson
+                content
         );
     }
 
@@ -108,7 +105,7 @@ public class TaskIO {
             String counterAsString = FileIO.readFileToString(RESOURCES_TASKIO_CONFIG);
             nextOffsetCounter = Integer.parseInt(counterAsString);
         }
-        FileIO.saveToFile(RESOURCES_TASKIO_CONFIG, String.valueOf(nextOffsetCounter++));
+        FileIO.saveToFile(RESOURCES_TASKIO_CONFIG, String.valueOf(++nextOffsetCounter));
         return String.valueOf(nextOffsetCounter);
     }
 }

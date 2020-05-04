@@ -40,27 +40,27 @@ socket.onmessage = (messageWrapper) => {
         signInSuccessful = true;
         showSignOut();
         hideSignIn();
-    
 
-    // Get the playlists div element.
-    let workspace = document.getElementById('email');
-    let header = document.createElement('h3');
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
 
-}
-// Check if the header is for a greeting.
-if (asJSONObject.header.localeCompare('greeting') === 0) {
-    // Get the app div element.
-    let workspace = document.getElementById('app');
-    // Create a header element.
-    let header = document.createElement('h1');
-    // Set the header element's text.
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
-}
+        // Get the playlists div element.
+        let workspace = document.getElementById('email');
+        let header = document.createElement('h3');
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+
+    }
+    // Check if the header is for a greeting.
+    if (asJSONObject.header.localeCompare('greeting') === 0) {
+        // Get the app div element.
+        let workspace = document.getElementById('app');
+        // Create a header element.
+        let header = document.createElement('h1');
+        // Set the header element's text.
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+    }
 };
 
 // When the web socket connects, send a test message.
@@ -81,11 +81,6 @@ function getMyPlaylists() {
 //function to sign out of your account
 function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
-
-    showSignIn();
-    hideSignOut();
-
-
 }
 
 function signIn() {
