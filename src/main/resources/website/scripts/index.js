@@ -28,6 +28,7 @@ socket.onmessage = (messageWrapper) => {
             // Create a list item element.
             let item = document.createElement('li');
             // Set the list item's text.
+            //let item = document.createElement('button');
             item.innerText = playlist.snippet.title;
             // Add the list item to the unordered list.
             list.appendChild(item);
@@ -36,31 +37,49 @@ socket.onmessage = (messageWrapper) => {
         workspace.appendChild(list);
     }
 
-    if (asJSONObject.header.localeCompare("email") === 0) {
+    if (asJSONObject.header.localeCompare("successfulSignIn") === 0) {
         signInSuccessful = true;
         showSignOut();
         hideSignIn();
-    
 
-    // Get the playlists div element.
-    let workspace = document.getElementById('email');
-    let header = document.createElement('h3');
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
 
-}
+        // Get the playlists div element.
+        let workspace = document.getElementById('email');
+        let header = document.createElement('h3');
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+
+    }
 // Check if the header is for a greeting.
-if (asJSONObject.header.localeCompare('greeting') === 0) {
-    // Get the app div element.
-    let workspace = document.getElementById('app');
-    // Create a header element.
-    let header = document.createElement('h1');
-    // Set the header element's text.
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
-}
+    if (asJSONObject.header.localeCompare('greeting') === 0) {
+        // Get the app div element.
+        let workspace = document.getElementById('app');
+        // Create a header element.
+        let header = document.createElement('h1');
+        // Set the header element's text.
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+    }
+
+
+    if (asJSONObject.header.localeCompare('successfulSignOut') === 0) {
+
+        showSignIn();
+        hideSignOut();
+
+    }
+
+    if (asJSONObject.header.localCompare('signedIn') === 0) {
+        showSignOut();
+        hideSignIn();
+    }
+
+    if (asJSONObject.header.localCompare('signedOut') === 0) {
+        showSignIn();
+        hideSignOut();
+    }
 };
 
 // When the web socket connects, send a test message.
@@ -81,10 +100,6 @@ function getMyPlaylists() {
 //function to sign out of your account
 function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
-
-    showSignIn();
-    hideSignOut();
-
 
 }
 
@@ -134,3 +149,7 @@ function showSignOut() {
         signOutButton.style.display = "block";
     }
 }
+
+socket.send(`{"header": "isSignedIn", "data": ""}`);
+
+

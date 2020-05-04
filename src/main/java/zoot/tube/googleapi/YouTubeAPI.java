@@ -25,4 +25,6 @@ public interface YouTubeAPI {
     String updatePlaylistVisibility(String playlist, PrivacyStatus privacyStatus);
 
     void setCredential(Credential credential);
+    
+    Credential getCredential();
 }
