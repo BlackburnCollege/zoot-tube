@@ -5,6 +5,7 @@ let socket = new WebSocket('ws://localhost:8080');
 let signInButton = document.getElementById("signInButton");
 let signOutButton = document.getElementById("signOutButton");
 var signInSuccessful;
+hideSignOut();
 
 // This is where you handle messages coming in through the web socket.
 socket.onmessage = (messageWrapper) => {
@@ -44,11 +45,9 @@ socket.onmessage = (messageWrapper) => {
 
 
         // Get the playlists div element.
-        let workspace = document.getElementById('email');
-        let header = document.createElement('h3');
+        let header = document.getElementById('email');
         header.innerText = asJSONObject.data;
         // Add the header to the app div.
-        workspace.appendChild(header);
 
     }
 // Check if the header is for a greeting.
@@ -71,14 +70,19 @@ socket.onmessage = (messageWrapper) => {
 
     }
 
-    if (asJSONObject.header.localCompare('signedIn') === 0) {
+    if (asJSONObject.header.localeCompare('signedIn') === 0) {
         showSignOut();
         hideSignIn();
+        let header = document.getElementById('email');
+        header.innerText = asJSONObject.data;
+        
     }
 
-    if (asJSONObject.header.localCompare('signedOut') === 0) {
+    if (asJSONObject.header.localeCompare('signedOut') === 0) {
         showSignIn();
         hideSignOut();
+        let header = document.getElementById('email');
+        header.innerText = "Not Signed In";
     }
 };
 
@@ -87,7 +91,7 @@ socket.onmessage = (messageWrapper) => {
 socket.onopen = () => {
     // Ask for the server's greeting.
     socket.send(`{"header": "getGreeting", "data": ""}`);
-    hideSignOut();
+    socket.send(`{"header": "isSignedIn", "data": ""}`);
     // You can do other stuff in here too!
 };
 
@@ -115,41 +119,27 @@ function signIn() {
 
 function hideSignIn() {
     var signInButton = document.getElementById("signInButton");
-    if (signInButton.style.display === "none") {
-        signInButton.style.display = "block";
-    } else {
         signInButton.style.display = "none";
-    }
+    
 }
 
 function hideSignOut() {
     var signOutButton = document.getElementById("signOutButton");
-    if (signOutButton.style.display === "none") {
-        signOutButton.style.display = "block";
-    } else {
         signOutButton.style.display = "none";
-    }
 }
 
 function showSignIn() {
     var signInButton = document.getElementById("signInButton");
-    if (signInButton.style.display === "block") {
-        signInButton.style.display = "none";
-    } else {
         signInButton.style.display = "block";
-    }
 
 }
 
 function showSignOut() {
     var signOutButton = document.getElementById("signOutButton");
-    if (signOutButton.style.display === "block") {
-        signOutButton.style.display = "none";
-    } else {
-        signOutButton.style.display = "block";
-    }
+    signOutButton.style.display = "block";
+
 }
 
-socket.send(`{"header": "isSignedIn", "data": ""}`);
+
 
 
