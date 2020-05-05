@@ -48,6 +48,22 @@ public class SchedulerExecutor {
 
         executorService.schedule(taskWrapper, scheduler.getDelay(), TimeUnit.SECONDS);
     }
+    
+        public void revertBack()
+    {
+        Runnable taskWrapper = new Runnable(){
+
+            @Override
+            public void run() 
+            {
+                scheduler.reExecute();
+                revertBack();
+            }
+
+        };
+
+        executorService.schedule(taskWrapper, TimeUnit.DAYS.toSeconds(1), TimeUnit.SECONDS);
+    }
 
     public void stop()
     {

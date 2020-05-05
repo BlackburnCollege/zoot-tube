@@ -57,6 +57,17 @@ public class Scheduler {
         simpleYouTubeAPI.updatePlaylistVisibility(playlist, newPrivacy);
     }
     
+    public void reExecute(){
+        List<PlaylistItem> playlistItem = new ArrayList<>();
+        playlistItem = simpleYouTubeAPI.getPlaylistItemsFromPlaylist(playlist);
+        Video video;
+        PrivacyStatus videoPrivacy;
+        for(int i = 0; i > playlistItem.size(); i++){
+            video = simpleYouTubeAPI.getVideoByID(playlistItem.get(i).getId());
+            videoPrivacy = video.getPrivacyStatus();
+        }
+    }
+    
     public void storeVideoPrivacy(){
         List<PlaylistItem> playlistItem = new ArrayList<>();
         playlistItem = simpleYouTubeAPI.getPlaylistItemsFromPlaylist(playlist);
