@@ -11,8 +11,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import zoot.tube.googleapi.*;
 import static java.time.ZonedDateTime.now;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -26,12 +28,18 @@ public class Scheduler {
     String clientSecretsUrl;
     Collection<String> scopes;
     PrivacyStatus newPrivacy;
+    Playlist playlist;
+    GoogleAuthJava googleAuthJava;  
+    SimpleYouTubeAPI simpleYouTubeAPI;
     private String taskName;
     private String taskPath;
     
-    public Scheduler(Date date, String user, String clientSecretsUrl, Collection<String> scopes, PrivacyStatus newPrivacy, String nameOfTask){
+    public Scheduler(Date date, String user, String clientSecretsUrl, Collection<String> scopes, PrivacyStatus newPrivacy, String nameOfTask, Playlist playlist){
         taskName = nameOfTask;
+        googleAuthJava = new GoogleAuthJava(clientSecretsUrl, scopes);
+        simpleYouTubeAPI = new SimpleYouTubeAPI(googleAuthJava.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(user)));
         desiredDate = date;
+        this.playlist = playlist;
         this.user = user;
         this.newPrivacy = newPrivacy;
         Date now = new Date();
@@ -45,8 +53,19 @@ public class Scheduler {
     public void execute(){
         GoogleAuthJava googleAuthJava = new GoogleAuthJava(clientSecretsUrl, scopes);   
         SimpleYouTubeAPI simpleYouTubeAPI = new SimpleYouTubeAPI(googleAuthJava.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(user)));
-        String playlist = simpleYouTubeAPI.getMyPlaylists();
+        this.storeVideoPrivacy();
         simpleYouTubeAPI.updatePlaylistVisibility(playlist, newPrivacy);
+    }
+    
+    public void storeVideoPrivacy(){
+        List<PlaylistItem> playlistItem = new ArrayList<>();
+        playlistItem = simpleYouTubeAPI.getPlaylistItemsFromPlaylist(playlist);
+        Video video;
+        PrivacyStatus videoPrivacy;
+        for(int i = 0; i > playlistItem.size(); i++){
+            video = simpleYouTubeAPI.getVideoByID(playlistItem.get(i).getId());
+            videoPrivacy = video.getPrivacyStatus();
+        }
     }
     
     public void storeTask(String taskAsJson) {
