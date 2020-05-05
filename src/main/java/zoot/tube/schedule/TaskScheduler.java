@@ -90,32 +90,36 @@ public class TaskScheduler {
         Credential credential = authenticator.authorizeUsingRefreshToken(refreshToken);
 
         if (task.getTaskType().equals(TaskType.MAKE_VIDEOS_IN_PLAYLIST_PRIVATE)) {
-            runnable = new Runnable() {
-                Credential hold = credential;
-                Task theTask = task;
-                List<Video> videos;
-
-                @Override
-                public void run() {
-                    System.out.println("Started Task Thing!!!!");
-                    long now = System.currentTimeMillis();
-                    if (now < theTask.getExpire().getTime()) {
-                        System.out.println("Setting Videos to be Private");
-                        videos = makeVideosInPlaylistPrivate(theTask, hold);
-
-                        // Schedule this task to run again after it expires.
-                        long delay = theTask.getExpire().getTime() - now;
-                        scheduler.schedule(createRunnableFromTask(theTask), delay, TimeUnit.MILLISECONDS);
-                    } else {
-                        System.out.println("Setting Videos back.");
-                        revertVideosInPlaylist(theTask, hold);
-                        System.out.println("Deleting task");
-                        TaskIO.deleteTask(theTask);
-                    }
-                }
-            };
+            runnable = this.getMakeVideosInPlaylistPrivateRunnable(task, credential);
         }
         return runnable;
+    }
+
+    private Runnable getMakeVideosInPlaylistPrivateRunnable(Task task, Credential credential) {
+        return new Runnable() {
+            Credential hold = credential;
+            Task theTask = task;
+
+            @Override
+            public void run() {
+                System.out.println("Started Task Thing!!!!");
+                long now = System.currentTimeMillis();
+                if (now < theTask.getExpire().getTime()) {
+                    System.out.println("Setting Videos to be Private");
+                    makeVideosInPlaylistPrivate(theTask, hold);
+
+                    // Schedule this task to run again after it expires.
+                    long delay = theTask.getExpire().getTime() - now;
+                    scheduler.schedule(createRunnableFromTask(theTask), delay, TimeUnit.MILLISECONDS);
+                } else {
+                    System.out.println("Setting Videos back.");
+                    revertVideosInPlaylist(theTask, hold);
+
+                    System.out.println("Deleting task");
+                    TaskIO.deleteTask(theTask);
+                }
+            }
+        };
     }
 
     /**
@@ -126,43 +130,39 @@ public class TaskScheduler {
      * @param task the Task to use.
      * @param credential the Credential to use.
      */
-    private List<Video> makeVideosInPlaylistPrivate(Task task, Credential credential) {
+    private void makeVideosInPlaylistPrivate(Task task, Credential credential) {
+        System.out.println("Running Task ID: " + task.getID());
+        System.out.println("Setting Videos in Playlist to private");
+
         SimpleYouTubeAPI youTubeAPI = new SimpleYouTubeAPI(credential);
+
+        System.out.println("Getting the Playlist");
         Playlist playlist = youTubeAPI.getPlaylistByID(task.getRelevantID());
+
+        System.out.println("Getting the PlaylistItems");
         List<PlaylistItem> playlistItems = youTubeAPI.getPlaylistItemsFromPlaylist(playlist);
+
+        // Get the Videos from the PlaylistItems and get current privacy statuses.
         List<Video> videos = new ArrayList<>();
+        List<VideoIdHolder> holders = new ArrayList<>();
         for (PlaylistItem playlistItem : playlistItems) {
-            Video video = youTubeAPI.getVideoByID(playlistItem.getContentDetails().getVideoId());
-            video.getSnippet().setThumbnails(null);
+            String videoId = playlistItem.getContentDetails().getVideoId();
+
+            System.out.println("Getting Video ID: " + videoId);
+            Video video = youTubeAPI.getVideoByID(videoId);
 
             videos.add(video);
+            holders.add(new VideoIdHolder(video.getId(), video.getStatus().getPrivacyStatus()));
         }
 
-//        Video[] videosAsArray = videos.toArray(new Video[0]);
-//        VideoArrayWrapper wrapper = new VideoArrayWrapper(videosAsArray);
-//        TaskIO.saveContentUnderTask(task, gson.toJson(wrapper));
-//        VideoWrapper[] videoWrappers = new VideoWrapper[videos.size()];
-//        for (int i = 0; i < videos.size(); i++) {
-//            Video video = videos.get(i);
-//            videoWrappers[i] = new VideoWrapper(video.getId(), video.getSnippet().getTitle(), video.getSnippet().getCategoryId(), video.getStatus().getPrivacyStatus());
-//        }
-//        TaskIO.saveContentUnderTask(task, gson.toJson(videos));
-        try {
-            TaskIO.saveContentUnderTask(task, new ObjectMapper().writeValueAsString(videos));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Saving previous privacy statuses...");
+        TaskIO.saveContentUnderTask(task, gson.toJson(holders));
 
         System.out.println("Making Videos Private...");
         for (Video video : videos) {
-            System.out.println("Setting: " + video.getId());
-            String previousStatus = video.getStatus().getPrivacyStatus();
+            System.out.println("Making Video Private ID: " + video.getId());
             youTubeAPI.updateVideoVisibility(video, PrivacyStatus.PRIVATE);
-
-            video.getStatus().setPrivacyStatus(previousStatus);
         }
-
-        return videos;
     }
 
     /**
@@ -172,38 +172,30 @@ public class TaskScheduler {
      * @param credential the Credential to use.
      */
     private void revertVideosInPlaylist(Task task, Credential credential) {
-        System.out.println("Step 1");
+        System.out.println("Running Task ID: " + task.getID());
+        System.out.println("Reverting Videos to previous privacy status");
+
         SimpleYouTubeAPI youTubeAPI = new SimpleYouTubeAPI(credential);
-        System.out.println("Step 2");
+
+        System.out.println("Loading previous privacy statuses...");
         String contentAsString = TaskIO.loadContentUnderTask(task);
-        System.out.println("Step 3");
-//        VideoArrayWrapper wrapper = gson.fromJson(contentAsString, VideoArrayWrapper.class);
-//        Video[] videos = wrapper.getVideos();
-//        Video[] videos = gson.fromJson(contentAsString, Video[].class);
-        Video[] videos = new Video[0];
-        try {
-            videos = new ObjectMapper().readValue(contentAsString, Video[].class);
-        } catch (IOException e) {
-            e.printStackTrace();
+        VideoIdHolder[] videoIdHolders = gson.fromJson(contentAsString, VideoIdHolder[].class);
+
+        System.out.println("Getting Videos from YouTube");
+        List<Video> videos = new ArrayList<>();
+        for (VideoIdHolder holder : videoIdHolders) {
+            Video video = youTubeAPI.getVideoByID(holder.getId());
+            video.getStatus().setPrivacyStatus(holder.getPrivacyStatus());
+            videos.add(video);
         }
 
-//        VideoWrapper[] wrappers = gson.fromJson(contentAsString, VideoWrapper[].class);
-//        List<Video> videos = new ArrayList<>();
-//        for (VideoWrapper wrapper : wrappers) {
-//            Video video = new Video();
-//            video.setId(wrapper.getId());
-//            video.setSnippet(new VideoSnippet().setTitle(wrapper.getTitle()).setCategoryId(wrapper.getCategoryId()));
-//            video.setStatus(new VideoStatus().setPrivacyStatus(wrapper.getPrivacyStatus()));
-//
-//            videos.add(video);
-//        }
-
-        System.out.println("Reverting Videos...");
+        System.out.println("Reverting Videos to previous privacy...");
         for (Video video : videos) {
             System.out.println("Reverting: " + video.getId());
             youTubeAPI.updateVideoVisibility(video, video.getStatus().getPrivacyStatus());
         }
 
+        System.out.println("Cleaning up task...");
         TaskIO.deleteContentUnderTask(task);
     }
 

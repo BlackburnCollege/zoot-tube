@@ -52,8 +52,10 @@ public class TaskIO {
 
         if (taskFiles != null) {
             for (File taskFile : taskFiles) {
-                String taskAsJson = FileIO.readFileToString(taskFile.getPath());
-                tasks.add(gson.fromJson(taskAsJson, Task.class));
+                if (!taskFile.getName().equals("empty.txt")) {
+                    String taskAsJson = FileIO.readFileToString(taskFile.getPath());
+                    tasks.add(gson.fromJson(taskAsJson, Task.class));
+                }
             }
         }
 
