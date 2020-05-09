@@ -66,7 +66,7 @@ public interface YouTubeAPI {
      * @param privacyStatus the new privacy status.
      * @return the PlaylistItem resulting from the API call.
      */
-    PlaylistItem updatePlaylistItemVisibility(PlaylistItem playlistItem, PrivacyStatus privacyStatus);
+    PlaylistItem updatePlaylistItemVisibility(PlaylistItem playlistItem, String privacyStatus);
 
     /**
      * Gets a Video by its ID.
@@ -89,7 +89,7 @@ public interface YouTubeAPI {
      * @param privacyStatus the new privacy status.
      * @return the Video resulting from the API call.
      */
-    Video updateVideoVisibility(Video video, PrivacyStatus privacyStatus);
+    Video updateVideoVisibility(Video video, String privacyStatus);
 
     /**
      * Sets the Credential to use for all API requests.
@@ -97,4 +97,6 @@ public interface YouTubeAPI {
      * @param credential the Credential to use.
      */
     void setCredential(Credential credential);
+    
+    Credential getCredential();
 }

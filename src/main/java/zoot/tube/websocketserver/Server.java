@@ -28,13 +28,17 @@ public class Server extends WebSocketServer {
      */
     public static Consumer<String> createDefaultGreeting(Server server, String greeting) {
         return message -> {
-            Gson gson = new GsonBuilder().create();
-            ApiRequest request = gson.fromJson(message, ApiRequest.class);
+            try {
+                Gson gson = new GsonBuilder().create();
+                ApiRequest request = gson.fromJson(message, ApiRequest.class);
 
-            // Make sure the message is asking for the greeting.
-            if (request.getHeader().equals("getGreeting")) {
-                // Send back the greeting.
-                server.sendMessage(String.format("{\"header\":\"greeting\",\"data\":\"%s\"}", greeting));
+                // Make sure the message is asking for the greeting.
+                if (request.getHeader().equals("getGreeting")) {
+                    // Send back the greeting.
+                    server.sendMessage(String.format("{\"header\":\"greeting\",\"data\":\"%s\"}", greeting));
+                }
+            } catch (Exception e) {
+                System.err.println("Message was not a standard request");
             }
         };
     }
