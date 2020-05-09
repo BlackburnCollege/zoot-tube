@@ -186,7 +186,9 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
         }
 
         // There SHOULD only be a single playlist with a given ID.
-        return response.getItems().size() > 0 ? response.getItems().get(0) : new Video();
+        Video video = response.getItems().size() > 0 ? response.getItems().get(0) : new Video();
+        System.out.println(video);
+        return video;
     }
 
     /**

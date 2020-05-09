@@ -151,7 +151,9 @@ public class TaskScheduler {
             System.out.println("Getting Video ID: " + videoId);
             Video video = youTubeAPI.getVideoByID(videoId);
 
+
             videos.add(video);
+            video.setEtag(null);
             holders.add(new VideoIdHolder(video.getId(), video.getStatus().getPrivacyStatus()));
         }
 
