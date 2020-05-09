@@ -2,6 +2,7 @@ console.log("How did I get here........?");
 
 // Create the web socket
 let socket = new WebSocket('ws://localhost:8080');
+let checkboxIds = [];
 var signInSuccessful;
 hideSignOut();
 
@@ -20,22 +21,29 @@ socket.onmessage = (messageWrapper) => {
     if (asJSONObject.header.localeCompare("playlists") === 0) {
         // Get the playlists div element.
         let workspace = document.getElementById('playlists');
+        workspace.innerHTML = "";
+        workspace.appendChild(document.createElement('br'));
         // Create an unordered list element.
-        let list = document.createElement('ul');
         // Loops through each playlist in the data array.
+        checkboxIds = [];
         asJSONObject.data.forEach((playlist) => {
             // Create a list item element.
-            let item = document.createElement('li');
+            checkboxIds.push(playlist.id);
+            let input = document.createElement('input');
+            input.type = "checkbox";
+            input.id = playlist.id;
+            let label = document.createElement('label');
+            label.for = playlist.id;
+            label.innerText = playlist.snippet.title;
             // Set the list item's text.
-            //let item = document.createElement('button');
-            item.innerText = playlist.snippet.title;
-            // Add the list item to the unordered list
-            list.appendChild(item);
+
+            workspace.appendChild(input);
+            workspace.appendChild(label);
+            workspace.appendChild(document.createElement('br'));
         });
 
         // Add the unordered list to the playlists div.
-        workspace.innerHTML = "";
-        workspace.appendChild(list);
+
     }
 
 
