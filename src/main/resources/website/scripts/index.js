@@ -44,7 +44,7 @@ socket.onmessage = (messageWrapper) => {
 
         let sendButton = document.createElement('button');
         sendButton.innerText = 'Click Me!';
-        sendButton.onclick = sendPlaylistIDs;
+        sendButton.onclick = openForm;
         workspace.appendChild(sendButton);
         // Add the unordered list to the playlists div.
     }
@@ -72,7 +72,6 @@ socket.onmessage = (messageWrapper) => {
         workspace.appendChild(header);
     }
 
-
     if (asJSONObject.header.localeCompare('successfulSignOut') === 0) {
         showSignIn();
         hideSignOut();
@@ -93,7 +92,6 @@ socket.onmessage = (messageWrapper) => {
         header.innerText = "Not Signed In";
         signInSuccessful = false;
     }
-
 };
 
 // When the web socket connects, send a test message.
@@ -127,7 +125,6 @@ function signIn() {
 function hideSignIn() {
     var signInButton = document.getElementById("signInButton");
     signInButton.style.display = "none";
-
 }
 
 function hideSignOut() {
@@ -145,7 +142,7 @@ function showSignOut() {
     signOutButton.style.display = "block";
 }
 
-function sendPlaylistIDs() {
+function sendPlaylistIDs(startMillis, expireMillis) {
     checkedIdsToSend = [];
     checkboxIds.forEach((checkboxId) => {
         // Get the checkbox
@@ -154,9 +151,63 @@ function sendPlaylistIDs() {
             checkedIdsToSend.push(checkboxId);
         }
     });
-    socket.send(`{"header": "scheduleLists", "data": "[${checkedIdsToSend}]"}`);
+    let message = `{"header": "scheduleLists", "data": {"start": ${startMillis}, "expire": ${expireMillis}, "ids": "[${checkedIdsToSend}]"}}`;
+    console.log(message);
+    socket.send(message);
 }
 
+function openForm() {
+    let form = document.createElement('form');
 
+    let startLabel = document.createElement('label');
+    startLabel.for = 'start';
+    startLabel.innerText = "Start Time";
+
+    let start = document.createElement('input');
+    start.type = 'date';
+    start.id = 'start';
+
+    let startTime = document.createElement('input');
+    startTime.type = 'time';
+
+    form.appendChild(startLabel);
+    form.appendChild(start);
+    form.appendChild(startTime);
+
+    form.appendChild(document.createElement('br'));
+
+    let expire = document.createElement('input');
+    expire.type = 'date';
+    expire.id = 'start';
+
+    let expireLabel = document.createElement('label');
+    expireLabel.for = 'expire';
+    expireLabel.innerText = "Expire Time";
+
+    let expireTime = document.createElement('input');
+    expireTime.type = 'time';
+
+    form.appendChild(expireLabel);
+    form.appendChild(expire);
+    form.appendChild(expireTime)
+
+    form.appendChild(document.createElement('br'));
+
+    let button = document.createElement('input');
+    button.type = 'submit';
+    button.value = 'Submit';
+    form.onsubmit = () => {
+        let startMillis = start.valueAsNumber + startTime.valueAsNumber;
+        let expireMillis = expire.valueAsNumber + expireTime.valueAsNumber;
+        sendPlaylistIDs(startMillis, expireMillis);
+    };
+    form.appendChild(button);
+
+    let newWindow = window.open('', null, 'width=400,height=100,resizeable,scrollbars');
+    newWindow.document.body.appendChild(form);
+    button.onclick = () => {
+        newWindow.close();
+    };
+}
 
 

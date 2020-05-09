@@ -78,70 +78,82 @@ public class App {
         // Add a handler for requesting the user's playlists.
         this.server.addMessageHandler((message) -> {
             // Parse the message.
-            ApiRequest request = this.gson.fromJson(message, ApiRequest.class);
+            try {
+                ApiRequest request = this.gson.fromJson(message, ApiRequest.class);
 
-            // Make sure the message is asking for the user's playlists.
-            if (request.getHeader().equals("getMyPlaylists")) {
-                // Get the playlists.
-                List<Playlist> myPlaylists = youtubeAPI.getMyPlaylists();
-                // Package up the playlists into a response.
-                String response = this.wrapIntoJsonObjectDataRaw("playlists", gson.toJson(myPlaylists));
-                System.out.println("Sending playlists");
-                this.server.sendMessage(response);
-            }
+                // Make sure the message is asking for the user's playlists.
+                if (request.getHeader().equals("getMyPlaylists")) {
+                    // Get the playlists.
+                    List<Playlist> myPlaylists = youtubeAPI.getMyPlaylists();
+                    // Package up the playlists into a response.
+                    String response = this.wrapIntoJsonObjectDataRaw("playlists", gson.toJson(myPlaylists));
+                    System.out.println("Sending playlists");
+                    this.server.sendMessage(response);
+                }
 
-            if (request.getHeader().equals("signIn")) {
+                if (request.getHeader().equals("signIn")) {
 
-                String user = "user";
+                    String user = "user";
 //                if(RefreshTokenSaver.loadRefreshToken(user).length() > 0){
 //                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(user));
 //                }else {
-                // Credential credential = this.getCredential(user);
-                Credential credential = authenticator.authorizeAndGetNewCredential(null);
-                youtubeAPI.setCredential(credential);
+                    // Credential credential = this.getCredential(user);
+                    Credential credential = authenticator.authorizeAndGetNewCredential(null);
+                    youtubeAPI.setCredential(credential);
 
-                if (credential != null) {
+                    if (credential != null) {
 
-                    // Create the YouTubeAPI
-                    String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
-                    System.out.println(usersEmail);
-                    RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
+                        // Create the YouTubeAPI
+                        String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
+                        System.out.println(usersEmail);
+                        RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
 
-                    String jSONEmail = this.wrapIntoJsonObject("successfulSignIn", usersEmail);
-                    //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
-                    this.server.sendMessage(jSONEmail);
+                        String jSONEmail = this.wrapIntoJsonObject("successfulSignIn", usersEmail);
+                        //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
+                        this.server.sendMessage(jSONEmail);
+                    }
+
                 }
 
-            }
-
-            if (request.getHeader().equals("signOut")) {
-                youtubeAPI.setCredential(null);
-                String signOut = this.wrapIntoJsonObject("successfulSignOut", null);
-                this.server.sendMessage(signOut);
-            }
-
-            if (request.getHeader().equals("isSignedIn")) {
-                if (this.getYouTubeAPICredential() != null) {
-                    String usersEmail = GoogleUtil.getUserInfo(this.getYouTubeAPICredential()).getEmail();
-
-                    String credentialStatus
-                            = this.wrapIntoJsonObject("signedIn", usersEmail);
-                    this.server.sendMessage(credentialStatus);
-                } else {
-                    String credentialStatus
-                            = this.wrapIntoJsonObject("signedOut", null);
-                    this.server.sendMessage(credentialStatus);
+                if (request.getHeader().equals("signOut")) {
+                    youtubeAPI.setCredential(null);
+                    String signOut = this.wrapIntoJsonObject("successfulSignOut", null);
+                    this.server.sendMessage(signOut);
                 }
-            }
-            
-            if (request.getHeader().equals("scheduleLists")){
-                //receives an array of playlistIDs
-                String[] ids = gson.fromJson(request.getData(), String[].class);
-                for (String id : ids) {
-                    System.out.println(id);
+
+                if (request.getHeader().equals("isSignedIn")) {
+                    if (this.getYouTubeAPICredential() != null) {
+                        String usersEmail = GoogleUtil.getUserInfo(this.getYouTubeAPICredential()).getEmail();
+
+                        String credentialStatus
+                                = this.wrapIntoJsonObject("signedIn", usersEmail);
+                        this.server.sendMessage(credentialStatus);
+                    } else {
+                        String credentialStatus
+                                = this.wrapIntoJsonObject("signedOut", null);
+                        this.server.sendMessage(credentialStatus);
+                    }
                 }
+
+            } catch (Exception e) {
+                System.err.println("Not a standard request");
             }
 
+            try {
+                ApiRequestTimes request = this.gson.fromJson(message, ApiRequestTimes.class);
+
+                if (request.getHeader().equals("scheduleLists")) {
+                    //receives an array of playlistIDs
+                    System.out.println(request.getData().getStart());
+                    System.out.println(request.getData().getExpire());
+                    String[] ids = gson.fromJson(request.getData().getIds(), String[].class);
+                    for (String id : ids) {
+                        System.out.println(id);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Not a timer request");
+            }
         });
     }
 
