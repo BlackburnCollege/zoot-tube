@@ -97,4 +97,6 @@ public interface YouTubeAPI {
      * @param credential the Credential to use.
      */
     void setCredential(Credential credential);
+    
+    Credential getCredential();
 }

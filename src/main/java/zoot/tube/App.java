@@ -20,8 +20,6 @@ import zoot.tube.websocketserver.Server;
  */
 public class App {
 
-
-
     /**
      * Ignore this method, it's so the JUnit tests pass. :)
      *
@@ -41,7 +39,6 @@ public class App {
     private YouTubeAPI youtubeAPI;
     private Server server;
     private Gson gson = new GsonBuilder().create();
-    
 
     /**
      * Starts the app.
@@ -59,7 +56,6 @@ public class App {
 
 
         // Create the web socket server.
-        
         this.server = new Server(8080);
         // Add message handlers to the server.
         this.addMessageHandlers();
@@ -96,33 +92,46 @@ public class App {
             }
 
             if (request.getHeader().equals("signIn")) {
+
                 String user = "user";
-                //testing this because user tokens don't exist, so reading from
-                //them DNE
-                String test = "juniorzoottube@gmail.com";
-                if(RefreshTokenSaver.loadRefreshToken(test).length() > 0){
-                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(test));
-                }else {
-               // Credential credential = this.getCredential(user);
-               Credential credential = authenticator.authorizeAndGetNewCredential(null);
+//                if(RefreshTokenSaver.loadRefreshToken(user).length() > 0){
+//                    authenticator.authorizeUsingRefreshToken(RefreshTokenSaver.loadRefreshToken(user));
+//                }else {
+                // Credential credential = this.getCredential(user);
+                Credential credential = authenticator.authorizeAndGetNewCredential(null);
                 youtubeAPI.setCredential(credential);
-                
 
-                // Create the YouTubeAPI
-                
-                String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
-                System.out.println(usersEmail);
-                RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
+                if (credential != null) {
 
+                    // Create the YouTubeAPI
+                    String usersEmail = GoogleUtil.getUserInfo(credential).getEmail();
+                    System.out.println(usersEmail);
+                    RefreshTokenSaver.saveRefreshToken(usersEmail, credential.getRefreshToken());
 
-                String jSONEmail = this.wrapIntoJsonObject("email", usersEmail);
-                //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
-                this.server.sendMessage(jSONEmail);
-              }
+                    String jSONEmail = this.wrapIntoJsonObject("successfulSignIn", usersEmail);
+                    //String response = this.wrapIntoJsonObjectDataRaw("email", jSONEmail);
+                    this.server.sendMessage(jSONEmail);
+                }
+
             }
-            
+
             if (request.getHeader().equals("signOut")) {
                 youtubeAPI.setCredential(null);
+                String signOut = this.wrapIntoJsonObject("successfulSignOut", null);
+                this.server.sendMessage(signOut);
+            }
+
+            if (request.getHeader().equals("isSignedIn")) {
+                String usersEmail = GoogleUtil.getUserInfo(this.getYouTubeAPICredential()).getEmail();
+                if (this.getYouTubeAPICredential() != null) {
+                    String credentialStatus
+                            = this.wrapIntoJsonObject("signedIn", usersEmail);
+                    this.server.sendMessage(credentialStatus);
+                } else {
+                    String credentialStatus
+                            = this.wrapIntoJsonObject("signedOut", null);
+                    this.server.sendMessage(credentialStatus);
+                }
             }
 
         });
@@ -201,5 +210,13 @@ public class App {
         input.nextLine();
 
         this.server.shutdown();
+    }
+
+    public Credential getYouTubeAPICredential() {
+        Credential tempCredential = this.youtubeAPI.getCredential();
+        if (tempCredential != null) {
+            return tempCredential;
+        }
+        return null;
     }
 }

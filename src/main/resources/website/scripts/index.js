@@ -5,6 +5,7 @@ let socket = new WebSocket('ws://localhost:8080');
 let signInButton = document.getElementById("signInButton");
 let signOutButton = document.getElementById("signOutButton");
 var signInSuccessful;
+hideSignOut();
 
 // This is where you handle messages coming in through the web socket.
 socket.onmessage = (messageWrapper) => {
@@ -28,6 +29,7 @@ socket.onmessage = (messageWrapper) => {
             // Create a list item element.
             let item = document.createElement('li');
             // Set the list item's text.
+            //let item = document.createElement('button');
             item.innerText = playlist.snippet.title;
             // Add the list item to the unordered list.
             list.appendChild(item);
@@ -36,31 +38,52 @@ socket.onmessage = (messageWrapper) => {
         workspace.appendChild(list);
     }
 
-    if (asJSONObject.header.localeCompare("email") === 0) {
+    if (asJSONObject.header.localeCompare("successfulSignIn") === 0) {
         signInSuccessful = true;
         showSignOut();
         hideSignIn();
-    
 
-    // Get the playlists div element.
-    let workspace = document.getElementById('email');
-    let header = document.createElement('h3');
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
 
-}
+        // Get the playlists div element.
+        let header = document.getElementById('email');
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+
+    }
 // Check if the header is for a greeting.
-if (asJSONObject.header.localeCompare('greeting') === 0) {
-    // Get the app div element.
-    let workspace = document.getElementById('app');
-    // Create a header element.
-    let header = document.createElement('h1');
-    // Set the header element's text.
-    header.innerText = asJSONObject.data;
-    // Add the header to the app div.
-    workspace.appendChild(header);
-}
+    if (asJSONObject.header.localeCompare('greeting') === 0) {
+        // Get the app div element.
+        let workspace = document.getElementById('app');
+        // Create a header element.
+        let header = document.createElement('h1');
+        // Set the header element's text.
+        header.innerText = asJSONObject.data;
+        // Add the header to the app div.
+        workspace.appendChild(header);
+    }
+
+
+    if (asJSONObject.header.localeCompare('successfulSignOut') === 0) {
+
+        showSignIn();
+        hideSignOut();
+
+    }
+
+    if (asJSONObject.header.localeCompare('signedIn') === 0) {
+        showSignOut();
+        hideSignIn();
+        let header = document.getElementById('email');
+        header.innerText = asJSONObject.data;
+        
+    }
+
+    if (asJSONObject.header.localeCompare('signedOut') === 0) {
+        showSignIn();
+        hideSignOut();
+        let header = document.getElementById('email');
+        header.innerText = "Not Signed In";
+    }
 };
 
 // When the web socket connects, send a test message.
@@ -68,7 +91,7 @@ if (asJSONObject.header.localeCompare('greeting') === 0) {
 socket.onopen = () => {
     // Ask for the server's greeting.
     socket.send(`{"header": "getGreeting", "data": ""}`);
-    hideSignOut();
+    socket.send(`{"header": "isSignedIn", "data": ""}`);
     // You can do other stuff in here too!
 };
 
@@ -81,10 +104,6 @@ function getMyPlaylists() {
 //function to sign out of your account
 function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
-
-    showSignIn();
-    hideSignOut();
-
 
 }
 
@@ -100,37 +119,27 @@ function signIn() {
 
 function hideSignIn() {
     var signInButton = document.getElementById("signInButton");
-    if (signInButton.style.display === "none") {
-        signInButton.style.display = "block";
-    } else {
         signInButton.style.display = "none";
-    }
+    
 }
 
 function hideSignOut() {
     var signOutButton = document.getElementById("signOutButton");
-    if (signOutButton.style.display === "none") {
-        signOutButton.style.display = "block";
-    } else {
         signOutButton.style.display = "none";
-    }
 }
 
 function showSignIn() {
     var signInButton = document.getElementById("signInButton");
-    if (signInButton.style.display === "block") {
-        signInButton.style.display = "none";
-    } else {
         signInButton.style.display = "block";
-    }
 
 }
 
 function showSignOut() {
     var signOutButton = document.getElementById("signOutButton");
-    if (signOutButton.style.display === "block") {
-        signOutButton.style.display = "none";
-    } else {
-        signOutButton.style.display = "block";
-    }
+    signOutButton.style.display = "block";
+
 }
+
+
+
+
