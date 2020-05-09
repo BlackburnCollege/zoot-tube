@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 import zoot.tube.googleapi.*;
-import zoot.tube.schedule.TaskScheduler;
 import zoot.tube.websocketserver.Server;
 
 /**
@@ -58,7 +57,6 @@ public class App {
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
 
-        TaskScheduler scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
 
         // Create the web socket server.
         
