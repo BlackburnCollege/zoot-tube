@@ -1,9 +1,7 @@
-console.log("How did I get here........?")
+console.log("How did I get here........?");
 
 // Create the web socket
 let socket = new WebSocket('ws://localhost:8080');
-let signInButton = document.getElementById("signInButton");
-let signOutButton = document.getElementById("signOutButton");
 var signInSuccessful;
 hideSignOut();
 
@@ -31,12 +29,15 @@ socket.onmessage = (messageWrapper) => {
             // Set the list item's text.
             //let item = document.createElement('button');
             item.innerText = playlist.snippet.title;
-            // Add the list item to the unordered list.
+            // Add the list item to the unordered list
             list.appendChild(item);
         });
+
         // Add the unordered list to the playlists div.
+        workspace.innerHTML = "";
         workspace.appendChild(list);
     }
+
 
     if (asJSONObject.header.localeCompare("successfulSignIn") === 0) {
         signInSuccessful = true;
@@ -67,7 +68,6 @@ socket.onmessage = (messageWrapper) => {
 
         showSignIn();
         hideSignOut();
-
     }
 
     if (asJSONObject.header.localeCompare('signedIn') === 0) {
@@ -75,7 +75,7 @@ socket.onmessage = (messageWrapper) => {
         hideSignIn();
         let header = document.getElementById('email');
         header.innerText = asJSONObject.data;
-        
+
     }
 
     if (asJSONObject.header.localeCompare('signedOut') === 0) {
@@ -83,6 +83,7 @@ socket.onmessage = (messageWrapper) => {
         hideSignOut();
         let header = document.getElementById('email');
         header.innerText = "Not Signed In";
+        signInSuccessful = false;
     }
 };
 
@@ -119,18 +120,18 @@ function signIn() {
 
 function hideSignIn() {
     var signInButton = document.getElementById("signInButton");
-        signInButton.style.display = "none";
-    
+    signInButton.style.display = "none";
+
 }
 
 function hideSignOut() {
     var signOutButton = document.getElementById("signOutButton");
-        signOutButton.style.display = "none";
+    signOutButton.style.display = "none";
 }
 
 function showSignIn() {
     var signInButton = document.getElementById("signInButton");
-        signInButton.style.display = "block";
+    signInButton.style.display = "block";
 
 }
 

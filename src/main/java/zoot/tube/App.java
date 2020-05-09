@@ -54,7 +54,6 @@ public class App {
         // youtubeAPI.setCredential(credential); // setting a Credential.
         // =================
 
-
         // Create the web socket server.
         this.server = new Server(8080);
         // Add message handlers to the server.
@@ -122,8 +121,9 @@ public class App {
             }
 
             if (request.getHeader().equals("isSignedIn")) {
-                String usersEmail = GoogleUtil.getUserInfo(this.getYouTubeAPICredential()).getEmail();
                 if (this.getYouTubeAPICredential() != null) {
+                    String usersEmail = GoogleUtil.getUserInfo(this.getYouTubeAPICredential()).getEmail();
+
                     String credentialStatus
                             = this.wrapIntoJsonObject("signedIn", usersEmail);
                     this.server.sendMessage(credentialStatus);
