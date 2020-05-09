@@ -1,2 +1,4 @@
 # zoot-tube
-An open source project to schedule videos/playlist privacy settings, and streamline recorded lecture uploading 
+
+A place to create unit tests for libraries.
+fyi, must have git-lfs to clone/checkout or it fails. 
