@@ -41,7 +41,10 @@ socket.onmessage = (messageWrapper) => {
             workspace.appendChild(label);
             workspace.appendChild(document.createElement('br'));
         });
-
+        let sendButton = document.createElement('button');
+        sendButton.innerText = 'Click Me!';
+        sendButton.onclick = sendPlaylistIds;
+        workspace.appendChild(sendButton);
         // Add the unordered list to the playlists div.
 
     }
@@ -147,6 +150,9 @@ function showSignOut() {
     var signOutButton = document.getElementById("signOutButton");
     signOutButton.style.display = "block";
 
+}
+function sendPlaylistIDs(){
+    
 }
 
 
