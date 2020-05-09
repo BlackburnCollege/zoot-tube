@@ -47,8 +47,8 @@ public class App {
         // This will need to be moved to login functionality.
         // Get the user's Credential.
         this.authenticator = new GoogleAuthJava(
-                "src/main/resources/client_secret.json",
-                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
+                CLIENT_SECRETS_URL,
+                SCOPES
         );
         youtubeAPI = new SimpleYouTubeAPI();
         // youtubeAPI.setCredential(credential); // setting a Credential.
