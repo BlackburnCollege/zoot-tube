@@ -136,7 +136,10 @@ public class App {
             
             if (request.getHeader().equals("scheduleLists")){
                 //receives an array of playlistIDs
-                System.out.println(request.getData());
+                String[] ids = gson.fromJson(request.getData(), String[].class);
+                for (String id : ids) {
+                    System.out.println(id);
+                }
             }
 
         });
@@ -182,28 +185,6 @@ public class App {
                 }
             }
         }
-    }
-
-    /**
-     * Gets a {@link Credential} for this to use.
-     *
-     * @param user the name to store the Credential under.
-     * @return a Credential for this app.
-     */
-    private Credential getCredential(String user) {
-        Credential credential;
-        String refreshToken = RefreshTokenSaver.loadRefreshToken(user);
-        this.authenticator = new GoogleAuthJava(
-                "src/main/resources/client_secret.json",
-                Arrays.asList("https://www.googleapis.com/auth/youtube.force-ssl", "https://www.googleapis.com/auth/userinfo.email")
-        );
-        if (refreshToken.length() > 0) {
-            credential = authenticator.authorizeUsingRefreshToken(refreshToken);
-        } else {
-            credential = authenticator.authorizeAndGetNewCredential(null);
-            RefreshTokenSaver.saveRefreshToken(user, credential.getRefreshToken());
-        }
-        return credential;
     }
 
     /**

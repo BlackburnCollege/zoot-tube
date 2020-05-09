@@ -44,18 +44,15 @@ socket.onmessage = (messageWrapper) => {
 
         let sendButton = document.createElement('button');
         sendButton.innerText = 'Click Me!';
-        sendButton.onclick = sendPlaylistIds(checkedIdsToSend);
+        sendButton.onclick = sendPlaylistIDs;
         workspace.appendChild(sendButton);
         // Add the unordered list to the playlists div.
-
     }
-
 
     if (asJSONObject.header.localeCompare("successfulSignIn") === 0) {
         signInSuccessful = true;
         showSignOut();
         hideSignIn();
-
 
         // Get the playlists div element.
         let header = document.getElementById('email');
@@ -63,7 +60,7 @@ socket.onmessage = (messageWrapper) => {
         // Add the header to the app div.
 
     }
-// Check if the header is for a greeting.
+
     if (asJSONObject.header.localeCompare('greeting') === 0) {
         // Get the app div element.
         let workspace = document.getElementById('app');
@@ -77,7 +74,6 @@ socket.onmessage = (messageWrapper) => {
 
 
     if (asJSONObject.header.localeCompare('successfulSignOut') === 0) {
-
         showSignIn();
         hideSignOut();
     }
@@ -118,17 +114,14 @@ function getMyPlaylists() {
 //function to sign out of your account
 function signOut() {
     socket.send(`{"header": "signOut", "data": ""}`);
-
 }
 
 function signIn() {
     socket.send(`{"header": "signIn", "data": ""}`);
-
     if (signInSuccessful) {
         showSignOut();
         hideSignIn();
     }
-
 }
 
 function hideSignIn() {
@@ -145,24 +138,23 @@ function hideSignOut() {
 function showSignIn() {
     var signInButton = document.getElementById("signInButton");
     signInButton.style.display = "block";
-
 }
 
 function showSignOut() {
     var signOutButton = document.getElementById("signOutButton");
     signOutButton.style.display = "block";
-
 }
-function sendPlaylistIDs(){
+
+function sendPlaylistIDs() {
     checkedIdsToSend = [];
-        checkboxIds.forEach((checkboxId) => {
-            // Get the checkbox
-            let checkbox = document.getElementById(checkboxId);
-            if(checkbox.checked === true){
-                checkedIdsToSend.push(checkboxId);
-            }
-        });
-        socket.send(`{"header": "scheduleLists", "data": ${checkedIdsToSend}}`);
+    checkboxIds.forEach((checkboxId) => {
+        // Get the checkbox
+        let checkbox = document.getElementById(checkboxId);
+        if (checkbox.checked === true) {
+            checkedIdsToSend.push(checkboxId);
+        }
+    });
+    socket.send(`{"header": "scheduleLists", "data": "[${checkedIdsToSend}]"}`);
 }
 
 
