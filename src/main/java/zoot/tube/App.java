@@ -140,8 +140,11 @@ public class App {
                     String[] ids = gson.fromJson(request.getData().getIds(), String[].class);
                     String user = GoogleUtil.getUserInfo(youtubeAPI.getCredential()).getEmail();
                     for (String id : ids) {
-                        System.out.println(new Date(request.getData().getStart()));
-//                        scheduler.scheduleMakeVideosInPlaylistPrivate(user, new Date(request.getData().getStart()), new Date(request.getData().getExpire()), id);
+                        long add = 5 * 60 * 60 * 1000;
+                        Date start = new Date(request.getData().getStart() + add);
+                        Date expire = new Date(request.getData().getExpire() + add);
+
+                        scheduler.scheduleMakeVideosInPlaylistPrivate(user, start, expire, id);
                     }
                 }
             } catch (Exception e) {

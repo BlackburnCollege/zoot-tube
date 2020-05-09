@@ -202,10 +202,11 @@ public class SimpleYouTubeAPI implements YouTubeAPI {
 
         Video response;
         try {
-            YouTube.Videos.Update request = youtube.videos().update("snippet,status", video);
+            YouTube.Videos.Update request = youtube.videos().update("snippet,contentDetails,status", video);
             response = request.execute();
         } catch (IOException e) {
-            System.err.println(String.format("Failed to update playlist privacy for playlist id: %s", video.getId()));
+            System.err.println(String.format("Failed to update video privacy for video id: %s", video.getId()));
+            e.printStackTrace();
             return video;
         }
 
