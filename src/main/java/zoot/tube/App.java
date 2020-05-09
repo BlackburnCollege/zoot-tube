@@ -133,6 +133,11 @@ public class App {
                     this.server.sendMessage(credentialStatus);
                 }
             }
+            
+            if (request.getHeader().equals("scheduleLists")){
+                //receives an array of playlistIDs
+                System.out.println(request.getData());
+            }
 
         });
     }
