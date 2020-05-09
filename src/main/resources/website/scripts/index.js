@@ -152,7 +152,15 @@ function showSignOut() {
 
 }
 function sendPlaylistIDs(){
-    
+    checkedIdsToSend = [];
+        checkboxIds.forEach((checkboxId) => {
+            // Get the checkbox
+            let checkbox = document.getElementById(checkboxId);
+            if(checkbox.checked === true){
+                checkedIdsToSend.push(checkboxId);
+            }
+        });
+        socket.send(`{"header": "scheduleLists", "data": ${checkedIdsToSend}}`);
 }
 
 
