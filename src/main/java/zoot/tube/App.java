@@ -7,11 +7,9 @@ import com.google.gson.GsonBuilder;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import zoot.tube.googleapi.*;
+import zoot.tube.schedule.TaskScheduler;
 import zoot.tube.websocketserver.Server;
 
 /**
@@ -38,6 +36,7 @@ public class App {
     private GoogleAuthJava authenticator;
     private YouTubeAPI youtubeAPI;
     private Server server;
+    private TaskScheduler scheduler;
     private Gson gson = new GsonBuilder().create();
 
     /**
@@ -46,13 +45,9 @@ public class App {
     public App() {
         // This will need to be moved to login functionality.
         // Get the user's Credential.
-        this.authenticator = new GoogleAuthJava(
-                CLIENT_SECRETS_URL,
-                SCOPES
-        );
-        youtubeAPI = new SimpleYouTubeAPI();
-        // youtubeAPI.setCredential(credential); // setting a Credential.
-        // =================
+        this.authenticator = new GoogleAuthJava(CLIENT_SECRETS_URL, SCOPES);
+        this.youtubeAPI = new SimpleYouTubeAPI();
+        this.scheduler = new TaskScheduler(CLIENT_SECRETS_URL, SCOPES);
 
         // Create the web socket server.
         this.server = new Server(8080);
@@ -141,14 +136,11 @@ public class App {
 
             try {
                 ApiRequestTimes request = this.gson.fromJson(message, ApiRequestTimes.class);
-
                 if (request.getHeader().equals("scheduleLists")) {
-                    //receives an array of playlistIDs
-                    System.out.println(request.getData().getStart());
-                    System.out.println(request.getData().getExpire());
                     String[] ids = gson.fromJson(request.getData().getIds(), String[].class);
+                    String user = GoogleUtil.getUserInfo(youtubeAPI.getCredential()).getEmail();
                     for (String id : ids) {
-                        System.out.println(id);
+                        scheduler.scheduleMakeVideosInPlaylistPrivate(user, new Date(request.getData().getStart()), new Date(request.getData().getExpire()), id);
                     }
                 }
             } catch (Exception e) {
