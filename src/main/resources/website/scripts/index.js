@@ -41,9 +41,10 @@ socket.onmessage = (messageWrapper) => {
             workspace.appendChild(label);
             workspace.appendChild(document.createElement('br'));
         });
+
         let sendButton = document.createElement('button');
         sendButton.innerText = 'Click Me!';
-        sendButton.onclick = sendPlaylistIds;
+        sendButton.onclick = sendPlaylistIds(checkedIdsToSend);
         workspace.appendChild(sendButton);
         // Add the unordered list to the playlists div.
 
@@ -96,6 +97,7 @@ socket.onmessage = (messageWrapper) => {
         header.innerText = "Not Signed In";
         signInSuccessful = false;
     }
+
 };
 
 // When the web socket connects, send a test message.
